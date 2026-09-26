@@ -1,0 +1,123 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Approve GRN</h1>  
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4"
+                    style="background: rgba(17, 24, 39, 0.6) !important; backdrop-filter: blur(10px); border: 1px solid rgba(251, 191, 36, 0.15) !important;">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th class="text-center">GRN ID</th>
+                                        <th class="text-center">PO ID</th>
+                                        <th>Supplier</th>
+                                        <th class="text-right">Total Amount</th>
+                                        <th class="text-center">Status</th>
+                                        <th class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for g in grns %}
+                                    <tr>
+                                        <td class="fw-semibold align-middle text-center">
+                                            GRN-{{g.0|stringformat:"06d"}} <br />
+                                            <span style="font-size: x-small !important;">{{g.1|date:"d-M-Y"}}</span>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            PO-{{g.2|stringformat:"06d"}} <br />
+                                            <span style="font-size: x-small !important;">{{g.3|date:"d-M-Y"}}</span>
+                                        </td>
+                                        <td class="align-middle">{{g.4}}</td>
+                                        <td class="align-middle text-right">₹{{g.5|floatformat:2}}</td>
+                                        <td class="align-middle text-center">
+                                            <span class="text-warning fw-bold">PENDING</span>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <a href="{% url 'manager_view_grn_items' g.0 %}" title="View Details"
+                                                class="btn btn-info btn-sm text-white"><i class="fas fa-eye"></i></a>
+                                            
+                                            <a href="{% url 'manager_approve_grn_action' g.0 2 %}"
+                                                class="btn btn-success btn-sm" title="Approve"
+                                                onclick="return confirm('Are you sure you want to approve this GRN and update stock?')">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                            <a href="{% url 'manager_approve_grn_action' g.0 3 %}"
+                                                class="btn btn-danger btn-sm" title="Reject"
+                                                onclick="return confirm('Are you sure you want to reject this GRN?')">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">
+                                            No Pending GRNs Found
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination Section - Minimalist Pill -->
+                        <div class="d-flex justify-content-center mt-5">
+                            <div class="pagination-pill-container">
+                                <!-- Info Section -->
+                                <div class="pagination-info-pill text-center">
+                                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of
+                                    {{ page_obj.paginator.count }} entries
+                                </div>
+
+                                <!-- Separator -->
+                                <div class="pagination-separator"></div>
+
+                                <!-- Navigation Wrapper -->
+                                <div class="pagination-wrapper-pill text-center">
+                                    {% if page_obj.has_previous %}
+                                    <a class="page-link pagination-link-pill pagination-nav-btn" href="?page=1"><i
+                                            class="fas fa-angle-double-left"></i></a>
+                                    <a class="page-link pagination-link-pill pagination-nav-btn"
+                                        href="?page={{ page_obj.previous_page_number }}"><i
+                                            class="fas fa-angle-left"></i></a>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <a class="page-link pagination-link-pill active" href="javascript:void(0)">{{ num }}</a>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
+                                        class="page-link pagination-link-pill" href="?page={{ num }}">{{ num }}</a>
+                                        {% endif %}
+                                        {% endfor %}
+
+                                        {% if page_obj.has_next %}
+                                        <a class="page-link pagination-link-pill pagination-nav-btn"
+                                            href="?page={{ page_obj.next_page_number }}"><i
+                                                class="fas fa-angle-right"></i></a>
+                                        <a class="page-link pagination-link-pill pagination-nav-btn"
+                                            href="?page={{ page_obj.paginator.num_pages }}"><i
+                                                class="fas fa-angle-double-right"></i></a>
+                                        {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

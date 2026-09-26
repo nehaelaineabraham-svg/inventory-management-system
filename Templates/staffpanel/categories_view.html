@@ -1,0 +1,78 @@
+{% extends 'staffpanel/staff_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4">
+        <!-- Header Section -->         
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Categories</h1>  
+            
+            <div class="d-flex align-items-center gap-3">
+                <!-- Neat Live Search -->
+                <div class="position-relative">
+                    <input type="text" id="liveSearch" value="{{ category_search }}" 
+                           class="form-control" 
+                           placeholder="Search categories..."
+                           style="width: 250px; background: rgba(31, 41, 55, 0.4) !important; border-color: rgba(251, 191, 36, 0.3) !important; color: #fff !important; border-radius: 20px !important; padding-left: 35px !important; padding-right: 35px !important; height: 35px !important; font-size: 0.85rem !important;">
+                    <i class="fas fa-search position-absolute" style="left: 12px; top: 10px; color: var(--exec-accent); pointer-events: none;"></i>
+                    <i class="fas fa-times position-absolute" id="clearSearch" style="right: 12px; top: 10px; color: var(--exec-muted); cursor: pointer; display: {% if category_search %}block{% else %}none{% endif %};"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4" style="background: rgba(17, 24, 39, 0.6) !important; backdrop-filter: blur(10px); border: 1px solid rgba(251, 191, 36, 0.15) !important;">
+                    <div id="categoryTableContainer" class="card-body">
+                        {% include 'staffpanel/categories_table_partial.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    let searchTimer;
+    const searchInput = document.getElementById('liveSearch');
+    const clearBtn = document.getElementById('clearSearch');
+    const container = document.getElementById('categoryTableContainer');
+
+    searchInput.addEventListener('input', function() {
+        clearBtn.style.display = this.value ? 'block' : 'none';
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            fetchPage(1);
+        }, 300);
+    });
+
+    clearBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        this.style.display = 'none';
+        fetchPage(1);
+    });
+
+    function fetchPage(page) {
+        const query = searchInput.value;
+        const url = `{% url 'staff_categories' %}?page=${page}&category_search=${encodeURIComponent(query)}&ajax=1`;
+        
+        container.style.opacity = '0.5';
+        
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                container.innerHTML = html;
+                container.style.opacity = '1';
+                // Scroll to top of table
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            })
+            .catch(err => {
+                console.error('Search failed:', err);
+                container.style.opacity = '1';
+            });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends 'staffpanel/staff_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<style>
+    .card {
+        border-radius: 18px !important;
+        background: linear-gradient(135deg, #1a2332 0%, #0f1720 100%) !important;
+        border: 1px solid rgba(251, 191, 36, 0.15) !important;
+    }
+    .form-control,
+    .form-select {
+        border-radius: 12px !important;
+        background: rgba(31, 41, 55, 0.7) !important;
+        border: 1.5px solid rgba(251, 191, 36, 0.15) !important;
+        color: #e5e7eb !important;
+    }
+    .form-control:focus,
+    .form-select:focus {
+        background: rgba(31, 41, 55, 0.9) !important;
+        border-color: #fbbf24 !important;
+        box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.1) !important;
+        color: #fff !important;
+    }
+    .professional-btn {
+        border-radius: 12px !important;
+        padding: 12px 24px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        border: none !important;
+    }
+    .professional-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+</style>
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem; color: #fff;">Report Damaged Items</h1>
+            <a href="{% url 'staff_dashboard' %}" class="btn btn-secondary btn-sm rounded-pill px-3">
+                <i class="fas fa-arrow-left me-1"></i> Dashboard
+            </a>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card shadow-lg mb-4">
+                    <div class="card-body p-4">
+                        <form action="{% url 'staff_damage_report' %}" method="POST">
+                            {% csrf_token %}
+                            
+                            <!-- Product Selection & Info -->
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label text-muted small fw-bold text-uppercase mb-0">
+                                            <i class="fas fa-box me-1"></i> Product
+                                        </label>
+                                        <span id="stock-badge" class="badge rounded-pill bg-dark border border-amber px-3 py-2" style="display: none; border-color: #fbbf24 !important;">
+                                            <span class="text-muted small me-1">Available:</span>
+                                            <span id="available-qty" class="text-amber fw-bold">0</span>
+                                        </span>
+                                    </div>
+                                    <select name="product_id" id="product_select" class="form-select form-control" required>
+                                        <option value="">Select Product to Report Damage</option>
+                                        {% for prod in products %}
+                                        <option value="{{ prod.id }}">{{ prod.product_name }} - SKU: {{ prod.sku }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Quantity & Reason -->
+                            <div class="row g-4 mb-5">
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small fw-bold text-uppercase mb-2">
+                                        <i class="fas fa-sort-numeric-up-alt me-1"></i> Quantity Damaged
+                                    </label>
+                                    <input type="number" name="qty" class="form-control" required min="1" placeholder="Enter quantity">
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label text-muted small fw-bold text-uppercase mb-2">
+                                        <i class="fas fa-comment-alt me-1"></i> Reason / Description
+                                    </label>
+                                    <textarea name="reason" class="form-control" rows="1" required
+                                        placeholder="e.g. Broken during transit, Expired, etc."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="d-flex justify-content-end gap-2 border-top pt-4" style="border-color: rgba(255,255,255,0.05) !important;">
+                                <a href="{% url 'staff_dashboard' %}" class="professional-btn btn-secondary d-flex align-items-center" style="background: #374151 !important; color: #fff; text-decoration: none;">
+                                    <i class="fas fa-times me-2"></i> Cancel
+                                </a>
+                                <button type="submit" class="professional-btn text-white d-flex align-items-center" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;">
+                                    <i class="fas fa-exclamation-triangle me-2"></i> Report Damage
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#product_select').on('change', function() {
+        var productId = $(this).val();
+        var stockBadge = $('#stock-badge');
+        var qtyDisplay = $('#available-qty');
+        
+        if (productId) {
+            $.ajax({
+                url: "{% url 'get_product_stock_ajax' %}",
+                data: {
+                    'product_id': productId
+                },
+                dataType: 'json',
+                success: function(data) {
+                    qtyDisplay.text(data.stock);
+                    stockBadge.fadeIn(300);
+                    
+                    // Add color indicators
+                    if (data.stock <= 0) {
+                        qtyDisplay.removeClass('text-amber').addClass('text-danger');
+                    } else if (data.stock <= 10) {
+                        qtyDisplay.removeClass('text-amber').addClass('text-warning');
+                    } else {
+                        qtyDisplay.removeClass('text-danger text-warning').addClass('text-amber');
+                    }
+                },
+                error: function() {
+                    stockBadge.hide();
+                }
+            });
+        } else {
+            stockBadge.fadeOut(200);
+        }
+    });
+});
+</script>
+{% endblock %}

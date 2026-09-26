@@ -1,0 +1,116 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4">
+        <!-- Header Section -->         
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Products</h1>  
+            <a href="{% url 'add_product' %}" 
+                class="btn btn-sm text-white" style="background-color: green !important;">
+                <i class="fas fa-plus"></i> New
+            </a>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">SKU</th>
+                                    <th>Product Name</th>
+                                    <th class="text-center">Category</th>
+                                    <th class="text-center">Unit</th>
+                                    <th class="text-right">Price</th>
+                                    <th class="text-center">Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in products %}
+                                <tr>
+                                    <td class="text-center">{{p.sku}}</td>
+                                    <td>{{p.product_name}}</td>
+                                    <td class="text-center">{{p.cat_name}}</td>
+                                    <td class="text-center">{{p.unit_name}}</td>
+                                    <td class="text-right">₹{{p.price}}</td>                                      
+                                    <td class="text-center">                      
+                                        {% if p.status == 1 %}
+                                        <a href="{% url 'disable_product' p.id %}" class="btn btn-success btn-sm ml-1" title="This product is enabled. Click to Disable."
+                                            onclick="return confirm('Disable this product?')"><i class="fas fa-check"></i></a>
+                                        {% else %}
+                                        <a href="{% url 'disable_product' p.id %}" class="btn btn-danger btn-sm ml-1" title="This product is disabled. Click to Enable."
+                                            onclick="return confirm('Enable this product?')"><i class="fas fa-ban"></i></a>
+                                        {% endif %}                                       
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'edit_product' p.id %}"  title="Edit"
+                                                class="btn btn-warning btn-sm text-white d-inline-flex align-items-center gap-1">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'delete_product' p.id %}"
+                                                class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1 ml-1"
+                                                onclick="return confirm('Are you sure?')" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a> 
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination Section - Minimalist Pill -->
+                        <div class="d-flex justify-content-center mt-5">
+                            <div class="pagination-pill-container">
+                                <!-- Info Section -->
+                                <div class="pagination-info-pill text-center">
+                                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of
+                                    {{ page_obj.paginator.count }} entries
+                                </div>
+
+                                <!-- Separator -->
+                                <div class="pagination-separator"></div>
+
+                                <!-- Navigation Wrapper -->
+                                <div class="pagination-wrapper-pill text-center">
+                                    {% if page_obj.has_previous %}
+                                    <a class="page-link pagination-link-pill pagination-nav-btn" href="?page=1"><i
+                                            class="fas fa-angle-double-left"></i></a>
+                                    <a class="page-link pagination-link-pill pagination-nav-btn"
+                                        href="?page={{ page_obj.previous_page_number }}"><i
+                                            class="fas fa-angle-left"></i></a>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <a class="page-link pagination-link-pill active" href="#">{{ num }}</a>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
+                                        class="page-link pagination-link-pill" href="?page={{ num }}">{{ num }}</a>
+                                        {% endif %}
+                                        {% endfor %}
+
+                                        {% if page_obj.has_next %}
+                                        <a class="page-link pagination-link-pill pagination-nav-btn"
+                                            href="?page={{ page_obj.next_page_number }}"><i
+                                                class="fas fa-angle-right"></i></a>
+                                        <a class="page-link pagination-link-pill pagination-nav-btn"
+                                            href="?page={{ page_obj.paginator.num_pages }}"><i
+                                                class="fas fa-angle-double-right"></i></a>
+                                        {% endif %}
+                                </div>
+                            </div>
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+ 
+</main>
+{% endblock %}

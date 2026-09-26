@@ -1,0 +1,266 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+
+<main>
+    <div class="container-fluid px-4">
+
+        <h1 class="mt-4">Create Purchase Order</h1>
+
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item">
+                <a href="{% url 'manager_dashboard' %}">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'manager_purchase_orders' %}">Purchase Orders</a>
+            </li>
+            <li class="breadcrumb-item active">Create PO</li>
+        </ol>
+
+        <div class="card mb-4">
+
+            <div class="card-header">
+                <i class="fas fa-plus me-1"></i>
+                New Purchase Order
+            </div>
+
+            <div class="card-body">
+
+                <form action="{% url 'manager_save_purchase_order' %}" method="post" id="poForm">
+                    {% csrf_token %}
+
+                    <div class="row mb-3">
+
+                        <div class="col-md-4">
+                            <label class="form-label">PO Number</label>
+                            <input type="text" class="form-control" value="{{ po_number }}" readonly>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">PO Date</label>
+                            <input type="date"
+                                   class="form-control"
+                                   name="po_date"
+                                   id="po_date"
+                                   required>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-control" name="status">
+                                <option value="PENDING" selected>Pending</option>
+                                <option value="RECEIVED">Received</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mt-3">
+                            <label class="form-label">Supplier</label>
+                            <select class="form-control" name="supplier_id" required>
+                                <option value="">Select Supplier</option>
+                                {% for s in suppliers %}
+                                <option value="{{ s.id }}">{{ s.supplier_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- ITEMS -->
+                    <h5 class="mt-4">Items</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="itemsTable">
+
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width:30%;">Product</th>
+                                    <th>Unit</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Total</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr class="item-row">
+
+                                    <td>
+                                        <select class="form-control product-select"
+                                                name="product_id[]"
+                                                required>
+                                            <option value="">Select Product</option>
+                                            {% for p in products %}
+                                            <option value="{{ p.id }}"
+                                                    data-price="{{ p.price }}"
+                                                    data-unit="{{ p.unit }}"
+                                                    {% if prefill_product and p.id == prefill_product.id %}selected{% endif %}>
+                                                {{ p.product_name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        <input type="text"
+                                               class="form-control unit-input"
+                                               value="{% if prefill_product %}{{ prefill_product.unit }}{% endif %}"
+                                               readonly>
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               class="form-control qty-input"
+                                               name="quantity[]"
+                                               min="1"
+                                               required>
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               step="0.01"
+                                               class="form-control price-input"
+                                               name="price[]"
+                                               value="{% if prefill_product %}{{ prefill_product.price }}{% endif %}"
+                                               required>
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               step="0.01"
+                                               class="form-control total-input"
+                                               readonly>
+                                    </td>
+
+                                    <td>
+                                        <button type="button"
+                                                class="btn btn-danger btn-sm remove-row">
+                                            Remove
+                                        </button>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                    <div class="row mt-3">
+
+                        <div class="col-md-6">
+                            <button type="button"
+                                    class="btn btn-secondary btn-sm"
+                                    id="addRow">
+                                Add Row
+                            </button>
+                        </div>
+
+                        <div class="col-md-6 text-end">
+                            <h4>Grand Total: ₹<span id="grandTotal">0.00</span></h4>
+                        </div>
+
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit"
+                                class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Save PO
+                        </button>
+
+                        <a href="{% url 'manager_purchase_orders' %}"
+                           class="btn btn-secondary">
+                            Cancel
+                        </a>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- SCRIPTS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$(document).ready(function () {
+
+    // Set today's date
+    var today = new Date().toISOString().split('T')[0];
+    $('#po_date').val(today);
+
+    initializeRows();
+    calculateGrandTotal();
+
+    // Add Row
+    $('#addRow').click(function () {
+        var newRow = $('.item-row:first').clone();
+        newRow.find('input').val('');
+        newRow.find('select').val('');
+        $('#itemsTable tbody').append(newRow);
+    });
+
+    // Remove Row
+    $(document).on('click', '.remove-row', function () {
+        if ($('.item-row').length > 1) {
+            $(this).closest('tr').remove();
+            calculateGrandTotal();
+        } else {
+            alert("At least one item is required.");
+        }
+    });
+
+    // Product Change
+    $(document).on('change', '.product-select', function () {
+        var selected = $(this).find(':selected');
+        var price = selected.data('price');
+        var unit = selected.data('unit');
+
+        var row = $(this).closest('tr');
+        row.find('.price-input').val(price);
+        row.find('.unit-input').val(unit);
+
+        calculateRowTotal(row);
+    });
+
+    // Qty or Price Change
+    $(document).on('input', '.qty-input, .price-input', function () {
+        calculateRowTotal($(this).closest('tr'));
+    });
+
+    function initializeRows() {
+        $('.product-select').each(function () {
+            var selected = $(this).find(':selected');
+            var price = selected.data('price');
+            var unit = selected.data('unit');
+
+            var row = $(this).closest('tr');
+            row.find('.price-input').val(price);
+            row.find('.unit-input').val(unit);
+
+            calculateRowTotal(row);
+        });
+    }
+
+    function calculateRowTotal(row) {
+        var qty = parseFloat(row.find('.qty-input').val()) || 0;
+        var price = parseFloat(row.find('.price-input').val()) || 0;
+        var total = (qty * price).toFixed(2);
+        row.find('.total-input').val(total);
+        calculateGrandTotal();
+    }
+
+    function calculateGrandTotal() {
+        var grandTotal = 0;
+        $('.total-input').each(function () {
+            grandTotal += parseFloat($(this).val()) || 0;
+        });
+        $('#grandTotal').text(grandTotal.toFixed(2));
+    }
+
+});
+</script>
+
+{% endblock %}

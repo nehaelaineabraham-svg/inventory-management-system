@@ -1,0 +1,118 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<style> 
+    /* Input Group - Match Modal */
+    .input-group {
+        display: flex;
+        align-items: center;
+    }
+
+    .input-group-text {
+        background: rgba(31, 41, 55, 0.7);
+        border: 1.5px solid rgba(251, 191, 36, 0.15);
+        border-right: none;
+        color: #fbbf24;
+        border-radius: 10px 0 0 10px;
+        font-weight: 600;
+    }
+
+    .input-group .form-control {
+        border-radius: 0 10px 10px 0 !important;
+        border-left: none !important;
+    }
+
+    .input-group .form-control:focus {
+        border-left: none !important;
+    }
+</style>
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-edit"></i>
+                        Edit Product
+                    </div>
+                    <div class="card-body">
+                        <form action="{% url 'update_product' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="pid" value="{{product.id}}"> 
+                            <div class="form-row">
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">SKU<span class="required-indicator">*</span></label>
+                                        <input type="text" class="form-control w-100" name="sku" value="{{product.sku}}" required>
+                                    </div>
+                                </div>
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Product Name<span class="required-indicator">*</span></label>
+                                        <input type="text" class="form-control w-100" name="product_name" value="{{product.product_name}}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Category<span class="required-indicator">*</span></label>   
+                                            <select class="form-control" name="cat_id" required>
+                                                <option value="">-- Select Category --</option>
+                                                {% for cat in categories %}
+                                                <option value="{{ cat.id }}" {% if cat.id == product.cat_id %}selected{% endif %}>
+                                                    {{cat.cat_name}}</option>
+                                                {% endfor %}
+                                            </select>     
+                                    </div>
+                                </div>
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Unit<span class="required-indicator">*</span></label>   
+                                            <select name="unit" class="form-control" required>
+                                                <option value="">-- Select Unit --</option>
+                                                {% for u in units %}
+                                                <option value="{{ u.unit_id }}"
+                                                        {% if u.unit_id == product.unit_id %}selected{% endif %}>
+                                                    {{ u.unit_name}}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Selling Price<span class="required-indicator">*</span></label>
+                                        <div class="input-group" style="width:200px;">
+                                            <span class="input-group-text">₹</span>
+                                            <input type="number" step="0.01" class="form-control" id="price" name="price"  value="{{product.price}}" required>
+                                        </div>
+                                    </div> 
+                                </div>
+                            </div> 
+                            <div class="form-col-6 d-flex align-items-end justify-content-end">                                    
+                                <div class="button-group">
+                                    <button type="submit" class="professional-btn text-white" style="background-color:darkgreen !important;">
+                                        <span class="fas fa-save" ></span>&nbsp;Update
+                                    </button>
+                                    <a href="{% url 'products' %}" class="professional-btn professional-btn-cancel"
+                                        style="background-color:red !important;">
+                                        <i class="fas fa-cancel"></i>&nbsp;Cancel
+                                    </a>
+                                </div>
+                            </div> 
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

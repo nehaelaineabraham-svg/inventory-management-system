@@ -1,0 +1,41 @@
+{% extends 'staffpanel/staff_layout.html' %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title text-warning">Expiry Alerts</h4>
+                    <div class="alert alert-info">
+                        Batches expiring in the next 30 days. Prioritize these for sales (FIFO).
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered zero-configuration">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Batch No</th>
+                                    <th>Expiry Date</th>
+                                    <th>Original Qty (IN)</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in expiring_data %}
+                                <tr>
+                                    <td>{{ item.1 }}</td>
+                                    <td>{{ item.2 }}</td>
+                                    <td class="text-danger font-weight-bold">{{ item.3 }}</td>
+                                    <td>{{ item.4 }}</td>
+                                    <td>{{ item.5 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

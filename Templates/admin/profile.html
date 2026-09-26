@@ -1,0 +1,114 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+    <style>
+        /* Small & Neat Button Overrides for Professional Style */
+        .professional-btn-sm {
+            padding: 0.5rem 1.2rem !important;
+            font-size: 0.8rem !important;
+            border-radius: 8px !important;
+            height: auto !important;
+            min-height: 36px !important;
+        }
+
+        .profile-label {
+            color: #9ca3af !important;
+            font-size: 0.75rem !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700 !important;
+            margin-bottom: 4px !important;
+        }
+
+        .profile-data {
+            color: #f3f4f6 !important;
+            font-weight: 500 !important;
+            font-size: 1.05rem !important;
+            padding-bottom: 8px !important;
+            border-bottom: 1px solid rgba(251, 191, 36, 0.15) !important;
+        }
+
+        .badge-neat {
+            padding: 0.4rem 1rem !important;
+            border-radius: 6px !important;
+            font-size: 0.75rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<main>
+    <div class="container-fluid px-4 pt-4">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-user-circle"></i>
+                        My Profile
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="form-row">
+                            <div class="form-col-6 mb-4">
+                                <div class="profile-label">Full Name</div>
+                                <div class="profile-data">{{ user_details.name }}</div>
+                            </div>
+                            <div class="form-col-6 mb-4">
+                                <div class="profile-label">Email / Username</div>
+                                <div class="profile-data">{{ user_details.email }}</div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-col-6 mb-4">
+                                <div class="profile-label">Role</div>
+                                <div class="mt-2 text-white">
+                                    <span class="badge badge-primary badge-neat">{{ user_details.role }}</span>
+                                </div>
+                            </div>
+                            <div class="form-col-6 mb-4">
+                                <div class="profile-label">Status</div>
+                                <div class="mt-2 text-white">
+                                    {% if user_details.status == 1 or user_details.status == 'active' %}
+                                    <span class="badge badge-success badge-neat">
+                                        <i class="fas fa-check-circle mr-1"></i> Active
+                                    </span>
+                                    {% else %}
+                                    <span class="badge badge-danger badge-neat">
+                                        <i class="fas fa-times-circle mr-1"></i> Inactive
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row mt-4 pt-3" style="border-top: 1px solid rgba(251, 191, 36, 0.1);">
+                            <div class="form-col-12 d-flex justify-content-start gap-2">
+                                <div class="button-group">
+                                    <a href="{% url 'admin_edit_profile' %}"
+                                        class="professional-btn professional-btn-sm text-white"
+                                        style="background-color:darkorange !important;">
+                                        <i class="fas fa-edit"></i>&nbsp;
+                                    </a>
+                                    <a href="{% url 'admin_change_password' %}"
+                                        class="professional-btn professional-btn-sm text-white"
+                                        style="background-color:rgb(74, 74, 255) !important;">
+                                        <i class="fas fa-key"></i>&nbsp;
+                                    </a>
+                                    <a href="{% url 'admin_dashboard' %}"
+                                        class="professional-btn professional-btn-sm professional-btn-cancel"
+                                        style="background-color:rgb(105, 105, 105) !important;">
+                                        <i class="fas fa-arrow-left"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

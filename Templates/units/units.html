@@ -1,0 +1,69 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Units</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item active">Unit Management</li>
+        </ol>
+
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-table me-1"></i>
+                        View Units
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Unit Name</th> 
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in units %}
+                                <tr>
+                                    <td>{{u.unit_name}}</td> 
+                                    <td>
+                                        <a href="{% url 'edit_unit' u.unit_id %}"
+                                            class="btn btn-warning btn-sm text-white">Edit</a>
+                                        <a href="{% url 'delete_unit' u.unit_id %}" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Are you sure?')">Delete</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-plus me-1"></i>
+                        Add Unit
+                    </div>
+                    <div class="card-body">
+                        <form action="{% url 'save_unit' %}" method="post">
+                            {% csrf_token %}
+                            <div class="form-group mb-3">
+                                <label>Unit Name</label>
+                                <input type="text" class="form-control" name="unit_name" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Save" class="btn btn-success">
+                                <input type="reset" value="Cancel" class="btn btn-danger">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

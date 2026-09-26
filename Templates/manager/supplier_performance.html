@@ -1,0 +1,118 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4">
+        <!-- Header Section -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Supplier Performance</h1>
+            <a href="{% url 'manager_supplier_performance_csv' %}" class="btn btn-secondary btn-md" style=" background-color: white !important;">
+                <i class="fas fa-file-csv fa-lg" style="color:#0f172a !important;"></i>
+            </a>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4"
+                    style="background: rgba(17, 24, 39, 0.6) !important; backdrop-filter: blur(10px); border: 1px solid rgba(251, 191, 36, 0.15) !important;">
+                    <div class="card-body">
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Supplier Name</th>
+                                    <th class="text-center">Total POs</th>
+                                    <th class="text-center">Approved POs</th>
+                                    <th class="text-center">Pending POs</th>
+                                    <th class="text-center">Performance Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in performance_data %}
+                                <tr>
+                                    <td>{{ row.1 }}</td>
+                                    <td class="text-center" style="font-weight: 600;">
+                                        {% if row.2 > 0 %}{{ row.2 }}{% else %}-{% endif %}
+                                    </td>
+                                    <td class="text-center text-success" style="font-weight: 600;">
+                                        {% if row.3 > 0 %}{{ row.3 }}{% else %}-{% endif %}
+                                    </td>
+                                    <td class="text-center" style="font-weight: 600; color: {% if row.4 > 0 %}#f87171{% else %}inherit{% endif %};">
+                                        {% if row.4 > 0 %}{{ row.4 }}{% else %}-{% endif %}
+                                    </td>
+                                    <td class="text-center" style="font-weight: 700;">
+                                        {% if row.3 > 0 %}
+                                            {% widthratio row.3 row.2 100 as percentage %}
+                                            {% if percentage|add:0 >= 90 %}
+                                                <span style="color: #10b981;">Excellent</span>
+                                            {% elif percentage|add:0 >= 75 %}
+                                                <span style="color: #3b82f6;">Good</span>
+                                            {% elif percentage|add:0 >= 50 %}
+                                                <span style="color: #f59e0b;">Average</span>
+                                            {% else %}
+                                                <span style="color: #ef4444;">Poor</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No performance data found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination Section - Minimalist Pill -->
+                        <div class="d-flex justify-content-center mt-5">
+                            <div class="pagination-pill-container">
+                                <!-- Info Section -->
+                                <div class="pagination-info-pill text-center">
+                                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of
+                                    {{ page_obj.paginator.count }} entries
+                                </div>
+
+                                <!-- Separator -->
+                                <div class="pagination-separator"></div>
+
+                                <!-- Navigation Wrapper -->
+                                    <div class="pagination-wrapper-pill text-center">
+                                        {% if page_obj.has_previous %}
+                                        <a class="page-link pagination-link-pill pagination-nav-btn" href="?page=1">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                        <a class="page-link pagination-link-pill pagination-nav-btn" href="?page={{ page_obj.previous_page_number }}">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                        {% endif %}
+
+                                        {% for num in page_obj.paginator.page_range %}
+                                            {% if page_obj.number == num %}
+                                                <a class="page-link pagination-link-pill active" href="javascript:void(0)">{{ num }}</a>
+                                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                                <a class="page-link pagination-link-pill" href="?page={{ num }}">{{ num }}</a>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if page_obj.has_next %}
+                                        <a class="page-link pagination-link-pill pagination-nav-btn" href="?page={{ page_obj.next_page_number }}">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                        <a class="page-link pagination-link-pill pagination-nav-btn" href="?page={{ page_obj.paginator.num_pages }}">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

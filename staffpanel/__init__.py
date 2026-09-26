@@ -1,0 +1,1 @@
+# Staff panel app initialization

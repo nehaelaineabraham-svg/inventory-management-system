@@ -1,0 +1,87 @@
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th class="text-center">Sale ID</th>
+            <th class="text-center">Sale Date</th>
+            <th>Customer</th>
+            <th class="text-right">Total Amount</th>
+            <th class="text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sale in sales %}
+        <tr>
+            <td class="text-center align-top">
+                <strong>SALE-{{ sale.0|stringformat:"06d" }}</strong>
+            </td>
+            <td class="align-top text-center">
+                {{ sale.1|date:"d-M-Y" }}
+            </td>
+            <td class="align-top">{{ sale.2 }}</td>
+            <td class="align-top text-right">
+                <strong>₹{{ sale.5|floatformat:2 }}</strong>
+            </td>
+            <td class="align-top text-center">
+                <div class="d-flex gap-1 justify-content-center">
+                    <a href="{% url 'staff_view_sale_items' sale.0 %}" title="View Items"
+                        class="btn btn-info btn-sm text-white">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="{% url 'staff_sales_invoice' sale.0 %}" title="Invoice"
+                        class="btn btn-info btn-sm text-white">
+                        <i class="fas fa-file-invoice"></i>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center text-muted">
+                No sales records found.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination Section - Minimalist Pill -->
+<div class="d-flex justify-content-center mt-5">
+    <div class="pagination-pill-container">
+        <!-- Info Section -->
+        <div class="pagination-info-pill text-center">
+            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of
+            {{ page_obj.paginator.count }} entries
+        </div>
+
+        <!-- Separator -->
+        <div class="pagination-separator"></div>
+
+        <!-- Navigation Wrapper -->
+        <div class="pagination-wrapper-pill text-center">
+            {% if page_obj.has_previous %}
+            <a class="page-link pagination-link-pill pagination-nav-btn" href="javascript:void(0)" onclick="fetchPage(1)"><i
+                    class="fas fa-angle-double-left"></i></a>
+            <a class="page-link pagination-link-pill pagination-nav-btn" href="javascript:void(0)"
+                onclick="fetchPage({{ page_obj.previous_page_number }})"><i
+                    class="fas fa-angle-left"></i></a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <a class="page-link pagination-link-pill active" href="javascript:void(0)">{{ num }}</a>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
+                class="page-link pagination-link-pill" href="javascript:void(0)" onclick="fetchPage({{ num }})">{{ num }}</a>
+                {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <a class="page-link pagination-link-pill pagination-nav-btn" href="javascript:void(0)"
+                    onclick="fetchPage({{ page_obj.next_page_number }})"><i
+                        class="fas fa-angle-right"></i></a>
+                <a class="page-link pagination-link-pill pagination-nav-btn" href="javascript:void(0)"
+                    onclick="fetchPage({{ page_obj.paginator.num_pages }})"><i
+                        class="fas fa-angle-double-right"></i></a>
+                {% endif %}
+        </div>
+    </div>
+</div>

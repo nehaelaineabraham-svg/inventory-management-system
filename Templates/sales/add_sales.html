@@ -1,0 +1,175 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Add Sale (Stock OUT)</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'sales_list' %}">Sales</a></li>
+            <li class="breadcrumb-item active">New Sale</li>
+        </ol>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-plus me-1"></i>
+                New Sale Details
+            </div>
+            <div class="card-body">
+                <form action="{% url 'save_sale' %}" method="post" id="salesForm">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Customer</label>
+                            <select class="form-control" name="customer_id" required>
+                                <option value="">Select Customer</option>
+                                {% for c in customers %}
+                                <option value="{{c.id}}">{{c.customer_name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Sale Date</label>
+                            <input type="date" class="form-control" name="sale_date" id="sale_date" required>
+                        </div>
+                    </div>
+
+                    <h5 class="mt-4">Items</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="itemsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 35%;">Product</th>
+                                    <th>Unit</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="item-row">
+                                    <td>
+                                        <select class="form-control product-select" name="product_id[]" required>
+                                            <option value="">Select Product</option>
+                                            {% for p in products %}
+                                            <option value="{{ p.id }}" data-price="{{ p.price }}"
+                                                data-unit="{{ p.unit }}">
+                                                {{ p.product_name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control unit-input" readonly>
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" class="form-control price-input" readonly>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control qty-input" name="qty[]" min="1"
+                                            required>
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" class="form-control total-input" readonly>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm remove-row">Remove</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-secondary btn-sm" id="addRow">Add Row</button>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <h4>Grand Total: $<span id="grandTotal">0.00</span></h4>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning mt-3">
+                        <small><i class="fas fa-exclamation-triangle"></i> Stock will be automatically reduced
+                            (OUT).</small>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i> Save Sale
+                        </button>
+                        <a href="{% url 'sales_list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Set today's date
+        var today = new Date().toISOString().split('T')[0];
+        $('#sale_date').val(today);
+
+        function calculateGrandTotal() {
+            var grandTotal = 0;
+            $('.total-input').each(function () {
+                var val = parseFloat($(this).val());
+                if (!isNaN(val)) grandTotal += val;
+            });
+            $('#grandTotal').text(grandTotal.toFixed(2));
+        }
+
+        function calculateRowTotal($row) {
+            var price = parseFloat($row.find('.price-input').val());
+            var qty = parseInt($row.find('.qty-input').val());
+            var total = 0;
+            if (!isNaN(price) && !isNaN(qty)) {
+                total = price * qty;
+            }
+            $row.find('.total-input').val(total.toFixed(2));
+            calculateGrandTotal();
+        }
+
+        // Product selection change
+        $(document).on('change', '.product-select', function () {
+            var $row = $(this).closest('.item-row');
+            var $option = $(this).find(':selected');
+            var price = $option.data('price');
+            var unit = $option.data('unit');
+
+            $row.find('.price-input').val(price);
+            $row.find('.unit-input').val(unit);
+            calculateRowTotal($row);
+        });
+
+        // Quantity change
+        $(document).on('input', '.qty-input', function () {
+            var $row = $(this).closest('.item-row');
+            calculateRowTotal($row);
+        });
+
+        // Add Row
+        $('#addRow').click(function () {
+            var newRow = $('.item-row:first').clone();
+            newRow.find('input').val('');
+            newRow.find('select').val('');
+            $('#itemsTable tbody').append(newRow);
+        });
+
+        // Remove Row
+        $(document).on('click', '.remove-row', function () {
+            if ($('.item-row').length > 1) {
+                $(this).closest('tr').remove();
+                calculateGrandTotal();
+            } else {
+                alert("At least one item is required.");
+            }
+        });
+    });
+</script>
+
+{% endblock %}

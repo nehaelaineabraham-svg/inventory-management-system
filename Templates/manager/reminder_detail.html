@@ -1,0 +1,110 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">View Stock Reminder</h1>
+            <a href="{% url 'manager_stock_reminders' %}" class="btn btn-secondary btn-sm rounded-pill px-3">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4" style="background: rgba(17, 24, 39, 0.6) !important; backdrop-filter: blur(10px); border: 1px solid rgba(251, 191, 36, 0.15) !important;">
+                    <div class="card-body">
+
+                        <!-- Metadata Row -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <label class="text-muted small text-uppercase fw-bold">Sent By</label>
+                                <p class="fw-bold mb-0" style="color: #fbbf24;">{{ r.staff_name }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="text-muted small text-uppercase fw-bold">Date Sent</label>
+                                <p class="mb-0 text-white">{{ r.date|date:"d-M-Y" }} <span class="small text-muted ml-1">{{ r.date|date:"H:i" }}</span></p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="text-muted small text-uppercase fw-bold">Status</label>
+                                <p class="mb-0 fw-bold">
+                                    {% if r.is_seen %}<span class="text-success"><i class="fas fa-check-double mr-1"></i> SEEN</span>{% else %}<span class="text-warning"><i class="fas fa-clock mr-1"></i> PENDING</span>{% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="text-muted small text-uppercase fw-bold">Reminder ID</label>
+                                <p class="mb-0 text-white">#{{ r.id|stringformat:"04d" }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Staff Message -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label class="text-muted small text-uppercase fw-bold">Staff Message</label>
+                                <div class="p-3" style="background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                                    <p class="mb-0 text-light" style="font-size: 1rem;">{{ r.message|default:"No additional message provided." }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Items Table -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm hover mb-0">
+                                <thead class="table-dark text-center">
+                                    <tr>
+                                        <th class="text-left">Product</th>
+                                        <th style="width:10%">SKU</th>
+                                        <th style="width:10%">Unit</th>
+                                        <th style="width:15%">Current Stock</th>
+                                        <th style="width:15%">Reorder Level</th>
+                                        <th style="width:13%">Status</th>
+                                        <th style="width:12%">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if r.items %}
+                                        {% for item in r.items %}
+                                        <tr {% if item.fulfilled %}style="background:rgba(16,185,129,0.07);"{% endif %}>
+                                            <td class="align-middle fw-bold text-white">{{ item.name }}</td>
+                                            <td class="text-center align-middle text-info small">{{ item.sku }}</td>
+                                            <td class="text-center align-middle text-white small">{{ item.unit }}</td>
+                                            <td class="text-center align-middle fw-bold {% if item.fulfilled %}text-success{% else %}text-danger{% endif %}">{{ item.qty }}</td>
+                                            <td class="text-center align-middle text-white">{{ item.reorder }}</td>
+                                            <td class="text-center align-middle">
+                                                {% if item.fulfilled %}<span class="badge badge-success px-2 py-1" style="font-size:0.7rem;border-radius:6px;"><i class="fas fa-check mr-1"></i>Fulfilled</span>{% else %}<span class="badge badge-danger px-2 py-1" style="font-size:0.7rem;border-radius:6px;"><i class="fas fa-exclamation mr-1"></i>Still Low</span>{% endif %}
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                {% if not item.fulfilled %}<a href="{% url 'manager_create_po' %}?pid={{ item.product_id }}" class="btn btn-xs btn-warning text-dark fw-bold px-2 py-1" style="font-size:0.65rem;border-radius:5px;">ORDER NOW</a>{% else %}<span class="text-muted small">—</span>{% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="7" class="p-4 text-center text-muted">
+                                                <i class="fas fa-exclamation-circle mr-2"></i> No item data found in this reminder.
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% if not r.is_seen %}
+                        <div class="mt-4 d-flex justify-content-end">
+                            <a href="{% url 'manager_mark_reminder_seen' r.id %}" class="btn btn-success rounded-pill px-4">
+                                <i class="fas fa-check mr-2"></i> Mark as Seen
+                            </a>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

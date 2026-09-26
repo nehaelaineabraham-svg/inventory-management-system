@@ -1,0 +1,396 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<style>
+    :root {
+        --exec-bg: #0f172a;
+        --exec-card-bg: #111827;
+        --exec-accent: #fbbf24;
+        --exec-text: #f1f5f9;
+        --exec-muted: #6b7280;
+        --exec-border: rgba(251, 191, 36, 0.1);
+    }
+
+    .dashboard-wrapper {
+        padding: 1.25rem;
+        background-color: var(--exec-bg);
+        min-height: 100vh;
+        color: var(--exec-text);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .executive-header {
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 0.75rem;
+    }
+
+    .executive-header h1 {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--exec-text);
+        margin: 0;
+        letter-spacing: -0.01em;
+    }
+
+    .executive-header p {
+        color: var(--exec-muted);
+        font-size: 0.8rem;
+        margin-top: 2px;
+    }
+
+    /* Metric Cards - Stealth Onyx (Dense) Style */
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+    }
+
+    .executive-card {
+        background: var(--exec-card-bg);
+        border: 1px solid var(--exec-border);
+        border-top: 3px solid var(--exec-accent);
+        border-radius: 8px;
+        padding: 1rem 0.75rem;
+        text-align: left;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    .executive-card:hover {
+        transform: translateY(-3px);
+        background: #1f2937;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 0 10px rgba(251, 191, 36, 0.1);
+        border-color: rgba(251, 191, 36, 0.3);
+    }
+
+    .exec-icon {
+        font-size: 1rem;
+        color: var(--exec-accent);
+        margin-bottom: 0.5rem;
+        opacity: 0.8;
+    }
+
+    .exec-val {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0.15rem 0;
+        letter-spacing: -0.02em;
+    }
+
+    .exec-label {
+        font-size: 0.6rem;
+        color: var(--exec-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+    }
+
+    .exec-link {
+        font-size: 0.65rem;
+        color: var(--exec-accent);
+        text-decoration: none;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        transition: all 0.2s;
+        font-weight: 600;
+        opacity: 0.4;
+    }
+
+    .exec-link:hover {
+        opacity: 1;
+        text-decoration: underline;
+    }
+
+    /* Dashboard Sections */
+    .exec-section {
+        background: rgba(17, 24, 39, 0.6);
+        border: 1px solid rgba(251, 191, 36, 0.15);
+        border-radius: 12px;
+        padding: 1rem;
+        height: 100%;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        transition: border-color 0.3s ease;
+    }
+
+    .exec-section:hover {
+        border-color: rgba(251, 191, 36, 0.3);
+    }
+
+    .exec-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--exec-accent);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Professional Table (Refined) */
+    .exec-table {
+        width: 100%;
+        color: var(--exec-text);
+        font-size: 0.82rem;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .exec-table th {
+        color: var(--exec-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--exec-border);
+    }
+
+    .exec-table td {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .exec-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: rgba(251, 191, 36, 0.1);
+        color: var(--exec-accent);
+        border: 1px solid var(--exec-border);
+    }
+
+    /* Summary Stats */
+    .summary-box {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+    }
+
+    .summary-box small {
+        color: var(--exec-muted);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+    }
+
+    .summary-box h3 {
+        margin: 0.15rem 0 0;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.02em;
+    }
+</style>
+
+<div class="dashboard-wrapper">
+
+    <!-- ===== METRIC GRID ===== -->
+    <div class="metric-grid">
+        <div class="executive-card">
+            <i class="fas fa-users exec-icon"></i>
+            <div>
+                <div class="exec-label">Active Users</div>
+                <div class="exec-val">{{ total_users }}</div>
+            </div>
+            <a href="{% url 'users' %}" class="exec-link">View Details <i class="fas fa-caret-right"></i></a>
+        </div>
+
+        <div class="executive-card">
+            <i class="fas fa-boxes exec-icon"></i>
+            <div>
+                <div class="exec-label">Product Count</div>
+                <div class="exec-val">{{ total_products }}</div>
+            </div>
+            <a href="{% url 'products' %}" class="exec-link">View Details <i class="fas fa-caret-right"></i></a>
+        </div>
+
+        <div class="executive-card">
+            <i class="fas fa-clipboard-list exec-icon"></i>
+            <div>
+                <div class="exec-label">Purchase Orders</div>
+                <div class="exec-val">{{ total_pos }}</div>
+            </div>
+            <a href="{% url 'purchase_orders' %}" class="exec-link">View Details <i class="fas fa-caret-right"></i></a>
+        </div>
+
+        <div class="executive-card">
+            <i class="fas fa-receipt exec-icon"></i>
+            <div>
+                <div class="exec-label">Goods Receipts</div>
+                <div class="exec-val">{{ total_grns }}</div>
+            </div>
+            <a href="{% url 'grn_list' %}" class="exec-link">View Details <i class="fas fa-caret-right"></i></a>
+        </div>
+
+        <div class="executive-card">
+            <i class="fas fa-money-bill-wave exec-icon"></i>
+            <div>
+                <div class="exec-label">Total Sales</div>
+                <div class="exec-val">{{ total_sales }}</div>
+            </div>
+            <a href="{% url 'sales_list' %}" class="exec-link">View Details <i class="fas fa-caret-right"></i></a>
+        </div>
+
+        <div class="executive-card">
+            <i class="fas fa-truck exec-icon"></i>
+            <div>
+                <div class="exec-label">Suppliers</div>
+                <div class="exec-val">{{ total_suppliers }}</div>
+            </div>
+            <a href="{% url 'suppliers' %}" class="exec-link">View Details <i class="fas fa-caret-right"></i></a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sales Chart (Revenue Trend) - Full Width Row -->
+        <div class="col-lg-12">
+            <div class="exec-section" style="min-height: 300px;">
+                <div class="exec-section-title">
+                    <i class="fas fa-chart-line"></i> Revenue Trend (7 Days)
+                </div>
+                <div style="height: 250px;">
+                    <canvas id="execChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-2">
+        <!-- Revenue Analytics (Financial Summary) -->
+        <div class="col-lg-3">
+            <div class="exec-section" style="height: 100%;">
+                <div class="exec-section-title" style="margin-bottom: 1rem;">
+                    <i class="fas fa-landmark"></i> Summary
+                </div>
+                <div class="summary-box">
+                    <small>Total Revenue</small>
+                    <h3 style="font-size: 1.1rem;">₹ {{ total_revenue }}</h3>
+                </div>
+                <div class="summary-box" style="margin-bottom: 0;">
+                    <small>Monthly</small>
+                    <h3 style="font-size: 1.1rem;">₹ {{ monthly_revenue }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Sales activity -->
+        <div class="col-lg-4">
+            <div class="exec-section" style="height: 100%;">
+                <div class="exec-section-title" style="margin-bottom: 1rem;">
+                    <i class="fas fa-history"></i> Recent Sales
+                </div>
+                <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                    <table class="exec-table">
+                        <thead>
+                            <tr>
+                                <th>Ref</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sale in recent_sales|slice:":8" %}
+                            <tr>
+                                <td style="font-weight: 600; font-size: 0.75rem;">#{{ sale.id|stringformat:"04d" }}</td>
+                                <td style="color: var(--exec-muted); font-size: 0.75rem;">{{ sale.sale_date|date:"d M Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center" style="color: var(--exec-muted); padding: 1rem; font-size: 0.75rem;">None.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Alerts -->
+        <div class="col-lg-5">
+            <div class="exec-section" style="height: 100%;">
+                <div class="exec-section-title" style="margin-bottom: 1rem;">
+                    <i class="fas fa-exclamation-triangle"></i> Low Stock
+                </div>
+                <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                    <table class="exec-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th class="text-center">Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in low_stock_products|slice:":8" %}
+                            <tr>
+                                <td style="color: #f87171; font-weight: 600; font-size: 0.75rem;">{{ product.product_name }}</td>
+                                <td class="text-center" style="font-weight: 700; font-size: 0.75rem;">{{ product.stock_qty }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center" style="color: #4ade80; padding: 1rem; font-size: 0.75rem;">Stable.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('execChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ sales_labels|safe }},
+            datasets: [{
+                label: 'Daily Revenue',
+                data: {{ sales_data|safe }},
+                borderColor: '#fbbf24',
+                borderWidth: 2,
+                backgroundColor: 'rgba(251, 191, 36, 0.05)',
+                fill: true,
+                tension: 0.1,
+                pointBackgroundColor: '#fbbf24',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#94a3b8', font: { size: 10 } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#94a3b8', font: { size: 10 } }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<style>
+    .card {
+        border-radius: 18px !important;
+    }
+    .card-header {
+        border-top-left-radius: 18px !important;
+        border-top-right-radius: 18px !important;
+    }
+    .form-control,
+    .form-select {
+        border-radius: 12px !important;
+    }
+    .table {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+</style>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mx-4 mt-3">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Edit GRN
+                {% if status.status|lower == 'pending' %}
+                    <span style="color:orange;"><strong>[{{ status.status }}]</strong></span>
+                {% elif status.status|lower == 'rejected' %}
+                    <span style="color:red;"><strong>[{{ status.status }}]</strong></span>
+                {% elif status.status|lower == 'approved' %}
+                    <span style="color:green;"><strong>[{{ status.status }}]</strong></span>
+                {% endif %}
+            </h1>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form action="{% url 'update_grn' %}" method="post" id="grnForm">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-label">GRN Number</label>
+                                    <input type="text" class="form-control" value="GRN-{{ grn.id|stringformat:'06d' }}" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">GRN Date</label>
+                                    <input type="text" class="form-control" value="{{ grn.grn_date|date:'d-M-Y' }}" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Associated PO</label>
+                                    <input type="text" class="form-control" value="PO-{{ po.id|stringformat:'06d' }}" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Supplier</label>
+                                    <input type="text" class="form-control" value="{{ supplier.supplier_name }}" readonly>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 mt-4">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="itemsTable">
+                                            <thead class="table-dark text-center">
+                                                <tr>
+                                                    <th class="align-middle">Product</th>
+                                                    <th class="align-middle text-center">Unit</th>
+                                                    <th class="align-middle text-center" style="width:120px;">Quantity</th>
+                                                    <th class="align-middle text-right" style="width:140px;">Rate</th>
+                                                    <th class="align-middle text-right" style="width:160px;">Amount</th>
+                                                    <th class="align-middle" width="80">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in grn_list %}
+                                                <tr class="item-row">
+                                                    <input type="hidden" name="grn_id[]" value="{{ item.id }}">
+                                                    <td>
+                                                        <input type="text" class="form-control" value="{{ item.product.product_name }} ({{ item.product.sku }})" readonly>
+                                                        <input type="hidden" name="product_id[]" value="{{ item.product.id }}">
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control unit-select" name="unit[]" disabled>
+                                                            {% for u in units %}
+                                                                <option value="{{ u.unit_id }}" {% if u.unit_id == item.unit.unit_id %}selected{% endif %}>
+                                                                    {{ u.unit_name }}
+                                                                </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="qty-input form-control text-center" name="qty[]" 
+                                                                value="{{ item.quantity }}" min="1" max="{{ item.bal_qty }}" required> 
+                                                        <small class="text-muted d-block text-center mt-1">Max: {{ item.bal_qty }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" class="price-input form-control text-right"
+                                                            value="{{ item.rate }}" readonly>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" class="linetotal form-control text-right" 
+                                                            value="{{ item.grn_amount }}" readonly>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <a href="{% url 'delete_grn' item.id %}"
+                                                           class="btn btn-danger btn-sm"
+                                                           onclick="return confirm('Delete this row from GRN?')">
+                                                           <i class="fas fa-trash"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                                <tr>
+                                                    <td colspan="4" class="text-right fw-bold align-middle">Total GRN Value (₹)</td>
+                                                    <td>
+                                                        <input type="text" id="grandTotalDisplay" class="form-control text-right fw-bold" readonly>
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12 d-flex justify-content-end gap-2">
+                                    <button type="submit" class="professional-btn text-white" style="background-color:darkgreen !important;">
+                                        <i class="fas fa-save me-1"></i> Update GRN
+                                    </button>
+                                    <a href="{% url 'grn_list' %}" class="professional-btn professional-btn-cancel"
+                                        style="background-color:red !important;">
+                                        <i class="fas fa-times me-1"></i> Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function () {
+    function calculateGrandTotal() {
+        let grandTotal = 0;
+        $('.linetotal').each(function () {
+            let val = parseFloat($(this).val()) || 0;
+            grandTotal += val;
+        });
+        $('#grandTotalDisplay').val(grandTotal.toFixed(2));
+    }
+
+    function calculateRowTotal(row) {
+        let qty = parseFloat(row.find('.qty-input').val()) || 0;
+        let price = parseFloat(row.find('.price-input').val()) || 0;
+        let total = qty * price;
+        row.find('.linetotal').val(total.toFixed(2));
+        calculateGrandTotal();
+    }
+
+    $('.item-row').each(function () {
+        calculateRowTotal($(this));
+    });
+
+    $(document).on('input', '.qty-input', function () {
+        calculateRowTotal($(this).closest('tr'));
+    });
+
+    $(document).on('change', '.product-select', function() {
+        // If product changes, it doesn't automatically change rate in this simple view
+        // because rate is tied to the original PO item. 
+        // But for style consistency, we keep the UI responsive.
+    });
+});
+</script>
+{% endblock %}

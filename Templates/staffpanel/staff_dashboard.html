@@ -1,0 +1,242 @@
+{% extends 'staffpanel/staff_layout.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<style>
+    :root {
+        --exec-bg: #0f172a;
+        --exec-card-bg: #111827;
+        --exec-accent: #fbbf24;
+        --exec-text: #f1f5f9;
+        --exec-muted: #6b7280;
+        --exec-border: rgba(251, 191, 36, 0.1);
+    }
+
+    .dashboard-wrapper {
+        padding: 1.25rem;
+        background-color: var(--exec-bg);
+        min-height: 100vh;
+        color: var(--exec-text);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .executive-header {
+        margin-bottom: 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .executive-header h1 {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--exec-text);
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+
+    .executive-header p {
+        color: var(--exec-muted);
+        font-size: 0.9rem;
+        margin-top: 4px;
+        margin-bottom: 0;
+    }
+
+    /* Metric Grid - Compact Slate Style */
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+    }
+
+    .executive-card {
+        background: var(--exec-card-bg);
+        border: 1px solid var(--exec-border);
+        border-top: 3px solid var(--exec-accent);
+        border-radius: 8px;
+        padding: 1rem 0.75rem;
+        text-align: left;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    .executive-card:hover {
+        transform: translateY(-3px);
+        background: #1f2937;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 0 10px rgba(251, 191, 36, 0.1);
+        border-color: rgba(251, 191, 36, 0.3);
+    }
+
+    .exec-icon {
+        font-size: 1rem;
+        color: var(--exec-accent);
+        margin-bottom: 0.5rem;
+        opacity: 0.8;
+    }
+
+    .exec-val {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0.15rem 0;
+        letter-spacing: -0.02em;
+    }
+
+    .exec-label {
+        font-size: 0.6rem;
+        color: var(--exec-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+    }
+
+    .exec-link {
+        font-size: 0.65rem;
+        color: var(--exec-accent);
+        text-decoration: none;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        transition: all 0.2s;
+        font-weight: 600;
+        opacity: 0.4;
+    }
+
+    .exec-link:hover {
+        opacity: 1;
+        text-decoration: underline;
+    }
+
+    /* Sections */
+    .exec-section {
+        background: rgba(17, 24, 39, 0.6);
+        border: 1px solid rgba(251, 191, 36, 0.15);
+        border-radius: 12px;
+        padding: 1rem;
+        height: 100%;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .exec-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--exec-accent);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+</style>
+
+<div class="dashboard-wrapper">
+    <div class="executive-header">
+        <div>
+            <h1>Staff Workspace</h1>
+            <p>Welcome back, {{ user_name }} | {{ user_role }}</p>
+        </div>
+        <div class="text-end">
+            <p id="liveClock" style="font-weight: 600; color: var(--exec-accent);"></p>
+        </div>
+    </div>
+
+    <!-- ===== METRIC GRID ===== -->
+    <div class="metric-grid">
+        <div class="executive-card">
+            <i class="fas fa-boxes exec-icon"></i>
+            <div>
+                <div class="exec-label">Collection</div>
+                <div class="exec-val">{{ total_products }}</div>
+            </div>
+            <a href="{% url 'staff_products' %}" class="exec-link">Inventory <i class="fas fa-caret-right"></i></a>
+        </div>
+
+        <div class="executive-card">
+            <i class="fas fa-exclamation-triangle exec-icon" style="color: #f87171;"></i>
+            <div>
+                <div class="exec-label">Low Stock</div>
+                <div class="exec-val">{{ low_stock_count }}</div>
+            </div>
+            <a href="{% url 'staff_stock_alerts' %}" class="exec-link">Details <i class="fas fa-caret-right"></i></a>
+        </div>
+
+        <div class="executive-card">
+            <i class="fas fa-shopping-cart exec-icon"></i>
+            <div>
+                <div class="exec-label">My Sales</div>
+                <div class="exec-val">{{ total_sales }}</div>
+            </div>
+            <a href="{% url 'staff_create_sales' %}" class="exec-link">Transactions <i class="fas fa-caret-right"></i></a>
+        </div>
+
+        <div class="executive-card">
+            <i class="fas fa-truck-loading exec-icon"></i>
+            <div>
+                <div class="exec-label">Stock Receipts</div>
+                <div class="exec-val">{{ total_grns }}</div>
+            </div>
+            <a href="{% url 'staff_enter_grn' %}" class="exec-link">View GRNs <i class="fas fa-caret-right"></i></a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Quick Actions Section -->
+        <div class="col-lg-12">
+            <div class="exec-section" style="min-height: 200px;">
+                <div class="exec-section-title">
+                    <i class="fas fa-bolt"></i> Quick Operations
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <a href="{% url 'staff_create_sales' %}" class="btn w-100" style="background: rgba(251, 191, 36, 0.1); color: var(--exec-accent); border: 1px solid var(--exec-border); padding: 1.5rem; text-align: center; border-radius: 12px; transition: all 0.3s;">
+                            <i class="fas fa-cart-plus d-block mb-2" style="font-size: 1.5rem;"></i>
+                            New Sale
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'staff_enter_grn' %}" class="btn w-100" style="background: rgba(251, 191, 36, 0.1); color: var(--exec-accent); border: 1px solid var(--exec-border); padding: 1.5rem; text-align: center; border-radius: 12px; transition: all 0.3s;">
+                            <i class="fas fa-plus-circle d-block mb-2" style="font-size: 1.5rem;"></i>
+                            Receive Stock
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'staff_damage_report' %}" class="btn w-100" style="background: rgba(251, 191, 36, 0.1); color: var(--exec-accent); border: 1px solid var(--exec-border); padding: 1.5rem; text-align: center; border-radius: 12px; transition: all 0.3s;">
+                            <i class="fas fa-house-damage d-block mb-2" style="font-size: 1.5rem;"></i>
+                            Report Damage
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'staff_stock_adjustment' %}" class="btn w-100" style="background: rgba(251, 191, 36, 0.1); color: var(--exec-accent); border: 1px solid var(--exec-border); padding: 1.5rem; text-align: center; border-radius: 12px; transition: all 0.3s;">
+                            <i class="fas fa-sync d-block mb-2" style="font-size: 1.5rem;"></i>
+                            Adjust Stock
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+        const options = { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        document.getElementById('liveClock').textContent = now.toLocaleDateString('en-US', options);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+</script>
+
+{% endblock %}

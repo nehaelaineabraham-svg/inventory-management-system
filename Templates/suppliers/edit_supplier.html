@@ -1,0 +1,83 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-edit"></i>
+                        Edit Supplier Details
+                    </div>
+                    <div class="card-body">
+                        <form action="{% url 'update_supplier' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="sid" value="{{supplier.id}}">
+                            <div class="form-row">
+                                <div class="form-col-6 form-group mb-1"> 
+                                    <label class="form-label">Supplier Name <span
+                                            class="required-indicator">*</span></label>
+                                    <input type="text" class="form-control w-100" name="supplier_name"
+                                        value="{{supplier.supplier_name}}" required> 
+                                </div>
+                                <div class="form-col-6">
+                                    <div class="form-group mb-1">
+                                        <label class="form-label">Phone <span
+                                                class="required-indicator">*</span></label>
+                                        <input type="text" class="form-control w-100" name="phone"
+                                            value="{{supplier.phone}}" 
+                                            minlength="10" maxlength="10" pattern="\d{10}"
+                                            title="Phone number must be exactly 10 digits"
+                                            oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                                            required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control w-100" name="email"
+                                            value="{{supplier.email}}">
+                                    </div>
+                                </div>
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Location</label>
+                                        <input type="text" class="form-control w-100" name="place"
+                                            value="{{supplier.place}}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col-6">
+                                    <div class="form-group mb-0">
+                                        <label class="form-label">Full Address</label>
+                                        <textarea class="form-control w-100" name="address"
+                                            rows="5" style="resize: none;">{{supplier.address}}</textarea>
+                                    </div>
+                                </div>
+                                <div class="form-col-6 d-flex align-items-end justify-content-center">                                    
+                                    <div class="button-group">
+                                        <button type="submit" class="professional-btn text-white" style="background-color:darkgreen !important;">
+                                            <span class="fas fa-save" ></span>&nbsp;Update
+                                        </button>
+                                        <a href="{% url 'suppliers' %}" class="professional-btn professional-btn-cancel"
+                                            style="background-color:red !important;">
+                                            <i class="fas fa-cancel"></i>&nbsp;Cancel
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

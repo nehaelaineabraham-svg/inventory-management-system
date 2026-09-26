@@ -1,0 +1,172 @@
+{% extends 'staffpanel/staff_layout.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Sale Details</h1>
+
+        </div>
+
+        <!-- Print-only receipt header -->
+        <div class="print-only text-center mb-4 d-none">
+            <h2 class="mb-1" style="color: #000; font-weight: 800; letter-spacing: 2px;">SALE RECEIPT</h2>
+            <h4 class="mb-0" style="color: #000;">INVENTORY SYSTEM</h4>
+            <p class="mb-0" style="color: #000;">123 Business Street, City, Country</p>
+            <p class="mb-2" style="color: #000;">Phone: +123 456 7890 | GSTIN: 29ABCDE1234F1Z5</p>
+            <div style="border-bottom: 2px dashed #000; margin-bottom: 20px;"></div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <span style="color:oklch(82.422% 0.11557 81.886 / 0.767);"><strong>Sale ID :</strong></span>
+                        SALE-{{ sale.id|stringformat:"06d" }}
+                    </div>
+                    <div class="col-md-3">
+                        <span style="color:oklch(82.422% 0.11557 81.886 / 0.767);"><strong>Date :</strong></span>
+                        {{ sale.sale_date|date:"d-m-Y" }}
+                    </div>
+                    <div class="col-md-6">
+                        <span style="color:oklch(82.422% 0.11557 81.886 / 0.767);"><strong>Customer :</strong></span>
+                        {{ sale.customer_name|default:"General Customer" }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 mt-4">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th>Product Name</th>
+                                        <th class="text-center">Unit</th>
+                                        <th class="text-center">Quantity</th>
+                                        <th class="text-right">Unit Price (₹)</th>
+                                        <th class="text-right">Total Price (₹)</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {% for item in items %}
+                                    <tr>
+                                        <td class="text-center">{{ forloop.counter }}</td>
+                                        <td>{{ item.product_name }}</td>
+                                        <td class="text-center">{{ item.unit_name|default:"-" }}</td>
+                                        <td class="text-center">{{ item.quantity }}</td>
+                                        <td class="text-right">{{ item.unit_price|floatformat:2 }}</td>
+                                        <td class="text-right">{{ item.total_price|floatformat:2 }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">
+                                            No items found for this sale.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% with display_total=grand_total|floatformat:2 %}
+                                    <tr>
+                                        <td colspan="5" class="text-right"><b style="color:#fbbf24;">Grand Total</b>
+                                        </td>
+                                        <td class="text-right"><b style="color:#fbbf24;">₹ {{ display_total }}</b></td>
+                                    </tr>
+                                    {% endwith %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="d-flex gap-2 mb-4 no-print">
+            <a href="{% url 'staff_sales_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>
+            </a>
+        </div>
+    </div>
+</main>
+
+<style>
+    @media print {
+        .page-wrapper {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #fff !important;
+        }
+
+        body {
+            background: #fff !important;
+            color: #000 !important;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+
+        .print-only {
+            display: block !important;
+        }
+
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+            background: #fff !important;
+            color: #000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .card-body {
+            padding: 0 !important;
+        }
+
+        .table-dark {
+            background-color: #f8f9fa !important;
+            color: #000 !important;
+            border-bottom: 2px solid #000 !important;
+        }
+
+        .table th {
+            background-color: #f8f9fa !important;
+            color: #000 !important;
+            border: 1px solid #dee2e6 !important;
+        }
+
+        .table td {
+            border: 1px solid #dee2e6 !important;
+            color: #000 !important;
+        }
+
+        strong,
+        b {
+            color: #000 !important;
+        }
+
+        .container-fluid {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.5rem !important;
+            margin-bottom: 20px !important;
+            color: #000 !important;
+        }
+    }
+
+    .print-only {
+        display: none;
+    }
+</style>
+{% endblock %}

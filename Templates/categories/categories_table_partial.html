@@ -1,0 +1,86 @@
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th class="text-center">Category ID</th>
+            <th>Category Name</th>
+            <th class="text-center">Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if categories %}
+        {% for c in categories %}
+        <tr>
+            <td class="text-center">{{c.id}}</td>
+            <td>{{c.cat_name}}</td>   
+            <td class="text-center">
+                {% if c.status == 1 %}
+                    <span style="color:green;">Active</span>
+                {% else %}
+                    <span style="color:red;">InActive</span>
+                {% endif %}                                        
+            </td>                               
+            <td>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'edit_category' c.id %}" title="Edit"
+                        class="btn btn-warning btn-sm text-white d-inline-flex align-items-center gap-1">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'delete_category' c.id %}"
+                        class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1 ml-1"
+                        onclick="return confirm('Are you sure?')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="4" class="text-center py-4 text-muted">No categories found matching your search.</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<!-- Pagination Section - Minimalist Pill -->
+<div class="d-flex justify-content-center mt-5">
+    <div class="pagination-pill-container">
+        <!-- Info Section -->
+        <div class="pagination-info-pill text-center">
+            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of
+            {{ page_obj.paginator.count }} entries
+        </div>
+
+        <!-- Separator -->
+        <div class="pagination-separator"></div>
+
+        <!-- Navigation Wrapper -->
+        <div class="pagination-wrapper-pill text-center">
+            {% if page_obj.has_previous %}
+            <a class="page-link pagination-link-pill pagination-nav-btn" href="#" onclick="fetchPage(1); return false;"><i
+                    class="fas fa-angle-double-left"></i></a>
+            <a class="page-link pagination-link-pill pagination-nav-btn"
+                href="#" onclick="fetchPage({{ page_obj.previous_page_number }}); return false;"><i
+                    class="fas fa-angle-left"></i></a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <a class="page-link pagination-link-pill active" href="#">{{ num }}</a>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} 
+            <a class="page-link pagination-link-pill" href="#" onclick="fetchPage({{ num }}); return false;">{{ num }}</a>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a class="page-link pagination-link-pill pagination-nav-btn"
+                href="#" onclick="fetchPage({{ page_obj.next_page_number }}); return false;"><i
+                    class="fas fa-angle-right"></i></a>
+            <a class="page-link pagination-link-pill pagination-nav-btn"
+                href="#" onclick="fetchPage({{ page_obj.paginator.num_pages }}); return false;"><i
+                    class="fas fa-angle-double-right"></i></a>
+            {% endif %}
+        </div>
+    </div>
+</div>

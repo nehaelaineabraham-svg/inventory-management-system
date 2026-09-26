@@ -1,0 +1,101 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">View GRN</h1>  
+        </div>   
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">                
+                {% for grn in grns %}
+                    <div class="row">
+                        <div class="col-md-3">
+                            <span style="color:oklch(82.422% 0.11557 81.886 / 0.767);"><strong>GRN ID :</strong></span>
+                            GRN-{{grn.id|stringformat:"06d" }}
+                        </div>
+                        <div class="col-md-3">
+                            <span style="color:oklch(82.422% 0.11557 81.886 / 0.767);"><strong>GRN Date :</strong></span>
+                            {{ grn.grn_date|date:"d-m-Y" }}
+                        </div>
+                        <div class="col-md-6">
+                            {% if grn.status|lower  == 'pending' %}
+                                <span style="color:orange;"><strong>{{ grn.status }}</strong></span>
+                            {% endif %}  
+                            {% if grn.status|lower  == 'rejected' %}
+                                <span style="color:red;"><strong>{{ grn.status }}</strong></span>
+                            {% endif %} 
+                            {% if grn.status|lower  == 'approved' %}
+                                <span style="color:green;"><strong>{{ grn.status }}</strong></span>
+                            {% endif %}                                                                             
+                        </div>
+                    </div> 
+                    <div class="row">
+                        <div class="col-md-3">
+                            <span style="color:oklch(82.422% 0.11557 81.886 / 0.767);"><strong style="width: 100px;">PO ID :&nbsp;&nbsp;&nbsp;</strong></span>
+                            GRN-{{grn.po_id|stringformat:"06d" }}
+                        </div>
+                        <div class="col-md-3">
+                            <span style="color:oklch(82.422% 0.11557 81.886 / 0.767);"><strong>PO Date :&nbsp;&nbsp;&nbsp;</strong></span>
+                            {{ grn.po_date|date:"d-m-Y" }}
+                        </div>
+                        <div class="col-md-6">
+                            <span style="color:oklch(82.422% 0.11557 81.886 / 0.767);"><strong>Supplier :</strong></span>
+                            {{ grn.supplier_name }}
+                        </div>
+                    </div> 
+                {% endfor %} 
+                <div class="row">
+                    <div class="col-12 mt-2">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-dark">
+                                    <tr> 
+                                        <th class="text-center">#</th>
+                                        <th>Product Name</th>
+                                        <th class="text-center">Unit</th>
+                                        <th class="text-center">Quantity</th>
+                                        <th class="text-right">Unit Price (₹)</th>
+                                        <th class="text-right">Total Price (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in items %}
+                                    <tr>
+                                        <td class="text-center">{{ forloop.counter }}</td>
+                                        <td>{{ item.product_name }}</td>
+                                        <td class="text-center">{{ item.unit_name|default:"-" }}</td>
+                                        <td class="text-center">{{ item.quantity }}</td>
+                                        <td class="text-right">{{ item.unit_price|floatformat:2 }}</td>
+                                        <td class="text-right">{{ item.total_price|floatformat:2 }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">
+                                            No items found for this GRN.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        <td colspan="5" class="text-right"><b style="color:#fbbf24;">Grand Total</b></td>
+                                        <td class="text-right"><b style="color:#fbbf24;">₹ {{ grand_total|floatformat:2 }}</b></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <!-- BACK BUTTON -->
+        <div class="mb-4">
+            <a href="{% url 'grn_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>
+            </a>
+        </div> 
+    </div>
+</main>
+{% endblock %}

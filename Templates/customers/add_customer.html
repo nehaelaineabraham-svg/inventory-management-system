@@ -1,0 +1,78 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4"> 
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card mb-4"> 
+                    <div class="card-header">
+                        <i class="fas fa-user"></i>
+                        New Customer
+                    </div> 
+                    <div class="card-body">
+                        <form action="{% url 'save_customer' %}" method="post">
+                            {% csrf_token %}
+                            <div class="form-row">
+                                <div class="form-col-6 form-group mb-1"> 
+                                    <label class="form-label">Customer Name <span
+                                            class="required-indicator">*</span></label>
+                                    <input type="text" class="form-control w-100" name="customer_name"
+                                        value="{{customer.customer_name}}" required> 
+                                </div>
+                                <div class="form-col-6">
+                                    <div class="form-group mb-1">
+                                        <label class="form-label">Phone <span
+                                                class="required-indicator">*</span></label>
+                                        <input type="text" class="form-control w-100" name="phone"
+                                            value="{{customer.phone}}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control w-100" name="email"
+                                            value="{{customer.email}}">
+                                    </div>
+                                </div>
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Location</label>
+                                        <input type="text" class="form-control w-100" name="place"
+                                            value="{{customer.place}}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col-6">
+                                    <div class="form-group mb-0">
+                                        <label class="form-label">Full Address</label>
+                                        <textarea class="form-control w-100" name="address"
+                                            rows="5" style="resize: none;">{{customer.address}}</textarea>
+                                    </div>
+                                </div>
+                                <div class="form-col-6 d-flex align-items-end justify-content-center">                                    
+                                    <div class="button-group">
+                                        <button type="submit" class="professional-btn text-white" style="background-color:darkgreen !important;">
+                                            <span class="fas fa-save" ></span>&nbsp;Save
+                                        </button>
+                                        <a href="{% url 'customers' %}" class="professional-btn professional-btn-cancel"
+                                            style="background-color:red !important;">
+                                            <i class="fas fa-cancel"></i>&nbsp;Cancel
+                                        </a>
+                                    </div>
+                                </div>
+                            </div> 
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

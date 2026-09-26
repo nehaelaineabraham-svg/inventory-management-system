@@ -1,0 +1,140 @@
+{% extends 'staffpanel/staff_layout.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Stock Level Alerts</h1>
+            <button type="button" class="btn btn-sm btn-warning text-dark fw-bold" data-toggle="modal"
+                data-target="#reminderModal">
+                <i class="fas fa-paper-plane me-1"></i> Send Reminder to Manager
+            </button>
+        </div>
+
+        <!-- Reminder Modal -->
+        <div class="modal fade" id="reminderModal" tabindex="-1" aria-labelledby="reminderModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg"
+                    style="background: #1a2332; color: #fff; border-radius: 15px;">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold" id="reminderModalLabel">Send Stock Reminder</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form action="{% url 'staff_send_reminder' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="modal-body py-4">
+                            <p class="text-muted small mb-3">A summary of all currently low-stock items will be
+                                automatically included in this reminder.</p>
+                            <label class="form-label small text-uppercase fw-bold text-muted">Additional Message
+                                (Optional)</label>
+                            <textarea name="reminder_message" class="form-control border-0 shadow-sm" rows="3"
+                                style="background: rgba(255,255,255,0.05); color: #fff; border-radius: 10px;"
+                                placeholder="e.g., These items are urgently needed for upcoming orders."></textarea>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-link text-muted text-decoration-none"
+                                data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-warning text-dark fw-bold px-4"
+                                style="border-radius: 8px;">
+                                Send Now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4"
+                    style="background: rgba(17, 24, 39, 0.6) !important; backdrop-filter: blur(10px); border: 1px solid rgba(251, 191, 36, 0.15) !important;">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Product Name</th>
+                                        <th class="text-center">SKU</th>
+                                        <th class="text-center">Reorder Level</th>
+                                        <th class="text-center">Current Stock</th>
+                                        <th class="text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in alerts %}
+                                    <tr>
+                                        <td class="align-middle fw-bold">{{ item.1 }}</td>
+                                        <td class="text-center align-middle">{{ item.2 }}</td>
+                                        <td class="text-center align-middle">{{ item.3 }}</td>
+                                        <td class="text-center align-middle text-danger fw-bold">{{ item.4 }}</td>
+                                        <td class="text-center align-middle">
+                                            <span class="badge bg-danger text-white rounded-pill px-3">Low Stock</span>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">
+                                            No Low Stock Alerts at this time.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination Section - Minimalist Pill -->
+                        <div class="d-flex justify-content-center mt-5">
+                            <div class="pagination-pill-container">
+                                <!-- Info Section -->
+                                <div class="pagination-info-pill text-center">
+                                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of
+                                    {{ page_obj.paginator.count }} entries
+                                </div>
+
+                                <!-- Separator -->
+                                <div class="pagination-separator"></div>
+
+                                <!-- Navigation Wrapper -->
+                                <div class="pagination-wrapper-pill text-center">
+                                    {% if page_obj.has_previous %}
+                                    <a class="page-link pagination-link-pill pagination-nav-btn" href="?page=1"><i
+                                            class="fas fa-angle-double-left"></i></a>
+                                    <a class="page-link pagination-link-pill pagination-nav-btn"
+                                        href="?page={{ page_obj.previous_page_number }}"><i
+                                            class="fas fa-angle-left"></i></a>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <a class="page-link pagination-link-pill active" href="javascript:void(0)">{{ num }}</a>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
+                                        class="page-link pagination-link-pill" href="?page={{ num }}">{{ num }}</a>
+                                        {% endif %}
+                                        {% endfor %}
+
+                                        {% if page_obj.has_next %}
+                                        <a class="page-link pagination-link-pill pagination-nav-btn"
+                                            href="?page={{ page_obj.next_page_number }}"><i
+                                                class="fas fa-angle-right"></i></a>
+                                        <a class="page-link pagination-link-pill pagination-nav-btn"
+                                            href="?page={{ page_obj.paginator.num_pages }}"><i
+                                                class="fas fa-angle-double-right"></i></a>
+                                        {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

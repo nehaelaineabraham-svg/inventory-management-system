@@ -1,0 +1,606 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'admin/' %}assets/images/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Inventory Management System</title>
+    <!-- Custom CSS -->
+    <link href="{% static 'admin/' %}assets/libs/chartist/dist/chartist.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'admin/' %}dist/css/style.min.css" rel="stylesheet">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+    <style>
+        /* Dark Theme Color Scheme */
+        :root {
+            --exec-bg: #0f172a;
+            --exec-card-bg: #111827;
+            --exec-accent: #fbbf24;
+            --exec-text: #f1f5f9;
+            --exec-muted: #6b7280;
+            --exec-border: rgba(251, 191, 36, 0.15);
+            /* Legacy mappings for partial compatibility */
+            --gold-primary: #fbbf24;
+            --text-light: #f1f5f9;
+        }
+
+        html,
+        body {
+            overflow: visible !important;
+            height: auto !important;
+        }
+
+        body {
+            background-color: var(--exec-bg) !important;
+            color: var(--exec-text) !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        }
+
+        #main-wrapper {
+            background-color: var(--exec-bg) !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        /* Topbar - Glassmorphism Slate */
+        .topbar {
+            background: rgba(17, 24, 39, 0.8) !important;
+            backdrop-filter: blur(12px) !important;
+            border-bottom: 1px solid var(--exec-border) !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .navbar {
+            background: transparent !important;
+        }
+
+        .navbar-header {
+            background: transparent !important;
+        }
+
+        .navbar-brand a {
+            color: #fbbf24 !important;
+        }
+
+        .navbar-light .navbar-nav .nav-link {
+            color: #d1d5db !important;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-light .navbar-nav .nav-link:hover {
+            color: #fbbf24 !important;
+        }
+
+        .navbar-light .navbar-nav .nav-link.active {
+            color: #fbbf24 !important;
+        }
+
+        /* Navbar Search */
+        .app-search {
+            background: rgba(31, 41, 55, 0.7) !important;
+            border: 1px solid rgba(251, 191, 36, 0.15) !important;
+            border-radius: 10px !important;
+        }
+
+        .app-search input {
+            background: transparent !important;
+            color: #e5e7eb !important;
+            border: none !important;
+        }
+
+        .app-search input::placeholder {
+            color: #6b7280 !important;
+        }
+
+        /* Notifications Dropdown - Executive Glass */
+        .mailbox {
+            background: rgba(17, 24, 39, 0.9) !important;
+            backdrop-filter: blur(20px) !important;
+            border: 1px solid var(--exec-border) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+            width: 300px !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            margin-top: 10px !important;
+        }
+
+        .drop-title {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(17, 24, 39, 0.2) 100%) !important;
+            padding: 15px 20px !important;
+            border-bottom: 1px solid var(--exec-border) !important;
+        }
+
+        .drop-title h4 {
+            color: var(--exec-accent) !important;
+            font-size: 0.95rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .message-center .message-item {
+            padding: 12px 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+            transition: all 0.2s ease !important;
+            text-decoration: none !important;
+        }
+
+        .message-center .message-item:hover {
+            background: rgba(251, 191, 36, 0.08) !important;
+        }
+
+        .message-center .message-item .mail-contnet {
+            padding-left: 12px !important;
+        }
+
+        .message-center .message-item .message-title {
+            color: var(--exec-text) !important;
+            font-weight: 600 !important;
+            margin-bottom: 2px !important;
+            font-size: 0.85rem !important;
+        }
+
+        .message-center .message-item .mail-desc {
+            color: var(--exec-muted) !important;
+            font-size: 0.75rem !important;
+            display: block !important;
+        }
+
+        .btn-circle {
+            width: 35px !important;
+            height: 35px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 0.8rem !important;
+        }
+
+        /* Unified Executive Glass Dropdowns */
+        .exec-glass-dropdown,
+        .user-dd,
+        .mailbox {
+            background: rgba(17, 24, 39, 0.9) !important;
+            backdrop-filter: blur(25px) !important;
+            border: 1px solid var(--exec-border) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+            padding: 10px 0 !important;
+            margin-top: 12px !important;
+            overflow: hidden !important;
+        }
+
+        .dropdown-item {
+            color: #d1d5db !important;
+            padding: 12px 20px !important;
+            font-size: 0.85rem !important;
+            font-weight: 500 !important;
+            transition: all 0.25s ease !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+        }
+
+        .dropdown-item i {
+            color: var(--exec-accent) !important;
+            font-size: 1rem !important;
+            width: 20px !important;
+            text-align: center !important;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(251, 191, 36, 0.1) !important;
+            color: var(--exec-accent) !important;
+            padding-left: 25px !important;
+        }
+
+        .dropdown-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+            margin: 8px 0 !important;
+        }
+
+        /* Branding - IMS EXECUTIVE */
+        .navbar-brand {
+            display: flex !important;
+            align-items: center !important;
+            padding: 0 15px !important;
+        }
+
+        .logo-text-premium {
+            font-family: 'Inter', sans-serif !important;
+            font-size: 1.1rem !important;
+            font-weight: 800 !important;
+            letter-spacing: 2px !important;
+            text-transform: uppercase !important;
+            display: flex !important;
+            gap: 6px !important;
+            color: #fff !important;
+        }
+
+        .logo-text-premium .accent {
+            color: var(--exec-accent) !important;
+        }
+
+        /* Sidebar - Executive Stealth */
+        .left-sidebar {
+            background: rgba(17, 24, 39, 0.95) !important;
+            backdrop-filter: blur(10px) !important;
+            border-right: 1px solid var(--exec-border) !important;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.4) !important;
+            position: absolute !important;
+            top: 3px !important;
+            height: auto !important;
+            overflow: visible !important;
+            z-index: 10 !important;
+        }
+
+        .sidebar-nav>ul>li.sidebar-item>a {
+            color: var(--exec-text) !important;
+            font-weight: 500;
+            height: 57px;
+            padding: 12px 20px !important;
+            opacity: 0.7;
+            transition: all 0.25s ease;
+        }
+
+        .sidebar-nav>ul>li.sidebar-item>a i {
+            color: var(--exec-accent) !important;
+            margin-right: 10px;
+        }
+
+        .sidebar-nav>ul>li.sidebar-item>a:hover {
+            opacity: 1;
+            background: rgba(251, 191, 36, 0.08) !important;
+            color: var(--exec-accent) !important;
+            border-left: 3px solid var(--exec-accent) !important;
+            padding-left: 17px !important;
+        }
+
+        .sidebar-nav>ul>li.sidebar-item>a.active {
+            opacity: 1;
+            background: rgba(251, 191, 36, 0.12) !important;
+            color: var(--exec-accent) !important;
+            border-left: 4px solid var(--exec-accent) !important;
+            padding-left: 16px !important;
+            font-weight: 700;
+        }
+
+        .scroll-sidebar {
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        .sidebar-nav ul.first-level li a {
+            color: #d1d5db !important;
+        }
+
+        .sidebar-nav ul.first-level li a:hover {
+            color: #fbbf24 !important;
+        }
+
+        .sidebar-footer {
+            background: rgba(251, 191, 36, 0.1) !important;
+            border-top: 1px solid rgba(251, 191, 36, 0.15) !important;
+            color: #d1d5db !important;
+            padding: 1rem !important;
+        }
+
+        /* Page Wrapper */
+        .page-wrapper {
+            background-color: var(--exec-bg) !important;
+            padding: 1.5rem !important;
+        }
+
+        /* Cards */
+        .card {
+            background: linear-gradient(135deg, #1a2332 0%, #0f1720 100%) !important;
+            border: 1px solid rgba(251, 191, 36, 0.15) !important;
+            color: #f3f4f6 !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        /* Forms */
+        .form-control {
+            background: rgba(31, 41, 55, 0.7) !important;
+            border: 1.5px solid rgba(251, 191, 36, 0.15) !important;
+            color: #e5e7eb !important;
+            border-radius: 8px !important;
+        }
+
+        .form-control:focus {
+            background: rgba(31, 41, 55, 0.9) !important;
+            border-color: #fbbf24 !important;
+            box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.1) !important;
+        }
+
+        /* Tables */
+        .table {
+            color: #f3f4f6 !important;
+            border-color: rgba(251, 191, 36, 0.15) !important;
+        }
+
+        /* Buttons */
+        .btn {
+            transition: all 0.3s ease !important;
+            color: #fff !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+            border: none !important;
+            color: #111827 !important;
+            font-weight: 600 !important;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 0.5rem 1rem !important;
+            font-weight: 600 !important;
+            color: #fff !important;
+        }
+
+        /* Alerts */
+        .alert {
+            background: rgba(31, 41, 55, 0.8) !important;
+            border: 1px solid rgba(251, 191, 36, 0.2) !important;
+            color: #f3f4f6 !important;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(17, 24, 39, 0.9) !important;
+            color: var(--exec-muted) !important;
+            border-top: 1px solid var(--exec-border) !important;
+            padding: 1rem 0 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="preloader">
+        <div class="lds-ripple">
+            <div class="lds-pos"></div>
+            <div class="lds-pos"></div>
+        </div>
+    </div>
+    <div id="main-wrapper" data-navbarbg="skin6" data-theme="light" data-layout="vertical" data-sidebartype="full"
+        data-boxed-layout="full">
+        <header class="topbar no-print" data-navbarbg="skin6">
+            <nav class="navbar top-navbar navbar-expand-md navbar-light">
+                <div class="navbar-header" data-logobg="skin5">
+                    <a class="nav-toggler waves-effect waves-light d-block d-md-none" href="javascript:void(0)">
+                        <i class="ti-menu ti-close"></i>
+                    </a>
+                    <div class="navbar-brand">
+                        <a href="{% url 'staff_dashboard' %}" class="logo">
+                            <span class="logo-text-premium">
+                                <span class="accent">IMS</span> EXECUTIVE
+                            </span>
+                        </a>
+                    </div>
+                    <a class="topbartoggler d-block d-md-none waves-effect waves-light" href="javascript:void(0)"
+                        data-toggle="collapse" data-target="#navbarSupportedContent"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <i class="ti-more"></i>
+                    </a>
+                </div>
+                <div class="navbar-collapse collapse" id="navbarSupportedContent" data-navbarbg="skin6">
+                    <ul class="navbar-nav float-left mr-auto">
+                        <li class="nav-item search-box">
+
+                            <form class="app-search position-absolute">
+                                <input type="text" class="form-control" placeholder="Search &amp; enter">
+                                <a class="srh-btn">
+                                    <i class="ti-close"></i>
+                                </a>
+                            </form>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav float-right">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle waves-effect waves-dark" href="" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">
+                                <i class="mdi mdi-bell font-20"></i>
+                                {% if low_stock_count > 0 %}
+                                <div class="notify">
+                                    <span class="heartbit"></span>
+                                    <span class="point"></span>
+                                </div>
+                                {% endif %}
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right mailbox animated bounceInDown">
+                                <ul class="list-style-none">
+                                    <li>
+                                        <div class="drop-title">
+                                            <h4 class="mb-0">{{ low_stock_count }} New Notifications</h4>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="message-center notifications">
+                                            {% if low_stock_count > 0 %}
+                                            <a href="{% url 'staff_stock_alerts' %}" class="message-item">
+                                                <span class="btn btn-danger btn-circle"><i
+                                                        class="fa fa-exclamation"></i></span>
+                                                <div class="mail-contnet">
+                                                    <h5 class="message-title">Low Stock</h5>
+                                                    <span class="mail-desc">{{ low_stock_count }} items below reorder
+                                                        level</span>
+                                                </div>
+                                            </a>
+                                            {% endif %}
+                                            {% if low_stock_count == 0 %}
+                                            <div class="message-item justify-content-center py-4">
+                                                <span class="mail-desc text-center">No new notifications</span>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-muted waves-effect waves-dark pro-pic" href=""
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img
+                                    src="{% static 'admin/' %}assets/images/users/1.jpg" alt="user"
+                                    class="rounded-circle" width="31"></a>
+                            <div class="dropdown-menu dropdown-menu-right user-dd animated bounceInDown">
+                                <a class="dropdown-item" href="javascript:void(0)">
+                                    <i class="ti-user"></i>
+                                    <span>My Profile</span>
+                                </a>
+                                <a class="dropdown-item" href="javascript:void(0)">
+                                    <i class="ti-settings"></i>
+                                    <span>Change Password</span>
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'staff_logout' %}">
+                                    <i class="ti-shift-right"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <aside class="left-sidebar no-print" data-sidebarbg="skin5">
+            <div class="scroll-sidebar">
+                <nav class="sidebar-nav">
+                    <ul id="sidebarnav">
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark sidebar-link"
+                                href="{% url 'staff_dashboard' %}" aria-expanded="false">
+                                <i class="mdi mdi-av-timer"></i>
+                                <span class="hide-menu">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark sidebar-link"
+                                href="{% url 'staff_products' %}" aria-expanded="false">
+                                <i class="mdi mdi-package-variant"></i>
+                                <span class="hide-menu">View Products</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark sidebar-link"
+                                href="{% url 'staff_categories' %}" aria-expanded="false">
+                                <i class="mdi mdi-tag-multiple"></i>
+                                <span class="hide-menu">View Categories</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark sidebar-link"
+                                href="{% url 'staff_grn_list' %}" aria-expanded="false">
+                                <i class="mdi mdi-truck-delivery"></i>
+                                <span class="hide-menu">GRN List (Stock IN)</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark sidebar-link"
+                                href="{% url 'staff_sales_list' %}" aria-expanded="false">
+                                <i class="mdi mdi-cube-send"></i>
+                                <span class="hide-menu">Sales List (Stock OUT)</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)"
+                                aria-expanded="false">
+                                <i class="mdi mdi-database"></i>
+                                <span class="hide-menu">Inventory</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item"><a href="{% url 'staff_stock_adjustment' %}"
+                                        class="sidebar-link ml-3"><i class="mdi mdi-pencil"></i><span class="hide-menu">
+                                            Stock Adjustment
+                                        </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'staff_damage_report' %}"
+                                        class="sidebar-link ml-3"><i class="mdi mdi-alert-octagon"></i><span
+                                            class="hide-menu">
+                                            Report Damage
+                                        </span></a></li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark sidebar-link"
+                                href="{% url 'staff_stock_alerts' %}" aria-expanded="false">
+                                <i class="mdi mdi-alert"></i>
+                                <span class="hide-menu">Stock Alerts</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark sidebar-link"
+                                href="{% url 'staff_stock_report' %}" aria-expanded="false">
+                                <i class="mdi mdi-file-chart"></i>
+                                <span class="hide-menu">Stock Report</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark sidebar-link"
+                                href="{% url 'staff_transactions' %}" aria-expanded="false">
+                                <i class="mdi mdi-history"></i>
+                                <span class="hide-menu">My Transactions</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{% url 'staff_logout' %}"
+                                aria-expanded="false">
+                                <i class="mdi mdi-power"></i>
+                                <span class="hide-menu">Logout</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+        </aside>
+        <div class="page-wrapper">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <strong>{{ message }}</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            {% block content %}
+            {% endblock %}
+
+            <footer class="footer text-center">
+                All Rights Reserved by Inventory Management System. &copy; 2025
+            </footer>
+        </div>
+    </div>
+    <script src="{% static 'admin/' %}assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="{% static 'admin/' %}assets/libs/popper.js/dist/umd/popper.min.js"></script>
+    <script src="{% static 'admin/' %}assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="{% static 'admin/' %}assets/extra-libs/sparkline/sparkline.js"></script>
+    <script src="{% static 'admin/' %}dist/js/waves.js"></script>
+    <script src="{% static 'admin/' %}dist/js/sidebarmenu.js"></script>
+    <script src="{% static 'admin/' %}dist/js/custom.min.js"></script>
+    <script src="{% static 'admin/' %}assets/libs/chartist/dist/chartist.min.js"></script>
+    <script
+        src="{% static 'admin/' %}assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+    <script src="{% static 'admin/' %}dist/js/pages/dashboards/dashboard1.js"></script>
+</body>
+
+</html>

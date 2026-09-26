@@ -1,0 +1,57 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-edit"></i>
+                        Edit Profile
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="">
+                            {% csrf_token %}
+                            <div class="form-row">
+                                <div class="form-col-6 form-group mb-3">
+                                    <label class="form-label">Name <span class="required-indicator">*</span></label>
+                                    <input type="text" class="form-control w-100" name="name"
+                                        value="{{ user_details.name }}" required>
+                                </div>
+                                <div class="form-col-6 form-group mb-3">
+                                    <label class="form-label">Email <span class="required-indicator">*</span></label>
+                                    <input type="email" class="form-control w-100" name="email"
+                                        value="{{ user_details.email }}" required>
+                                    <small class="form-text text-muted">Changing this will change your login
+                                        username.</small>
+                                </div>
+                            </div>
+
+                            <div class="form-row mt-4">
+                                <div class="form-col-12 d-flex justify-content-start">
+                                    <div class="button-group">
+                                        <button type="submit" class="professional-btn text-white"
+                                            style="background-color:darkgreen !important;">
+                                            <span class="fas fa-save"></span>&nbsp;Update Profile
+                                        </button>
+                                        <a href="{% url 'admin_profile' %}"
+                                            class="professional-btn professional-btn-cancel"
+                                            style="background-color:red !important;">
+                                            <i class="fas fa-times"></i>&nbsp;Cancel
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

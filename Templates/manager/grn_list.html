@@ -1,0 +1,64 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">GRN (Goods Receipt Note)</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'manager_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Stock IN Management</li>
+        </ol>
+
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-table me-1"></i>
+                        GRN recorded by Purchase Orders
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <th>PO ID</th>
+                                    <th>PO Date</th>
+                                    <th>Supplier</th>
+                                    <th>Status</th>
+                                    <th>GRN Count</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for g in grn_list %}
+                                <tr>
+                                    <td>PO-{{g.0}}</td>
+                                    <td>{{g.1}}</td>
+                                    <td>{{g.2}}</td>
+                                    <td>
+                                        {% if g.3|lower == 'pending' %}
+                                        <span class="badge bg-warning text-white">Pending</span>
+                                        {% elif g.3|lower == 'approved' or g.3|lower == 'received' %}
+                                        <span class="badge bg-success text-white">Received</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary text-white">{{g.3}}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{g.4}} Items</td>
+                                    <td>
+                                        <a href="{% url 'manager_add_grn' g.0 %}?from=grn_list"
+                                            class="btn btn-primary btn-sm">
+                                            Record GRN
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

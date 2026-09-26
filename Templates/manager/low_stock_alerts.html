@@ -1,0 +1,65 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Low Stock Alerts</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'manager_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Low Stock</li>
+        </ol>
+
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">
+                <i class="fas fa-exclamation-triangle me-1"></i>
+                Products below Reorder Level
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-sm hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Product Name</th>
+                            <th>SKU</th>
+                            <th>Reorder Level</th>
+                            <th>Current Stock</th>
+                            <th>Gap</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if alerts %}
+                        {% for a in alerts %}
+                        <tr>
+                            <td>{{ a.1 }}</td>
+                            <td>{{ a.2 }}</td>
+                            <td>{{ a.3 }}</td>
+                            <td class="fw-bold {% if a.4 == 0 %}text-warning{% else %}text-success{% endif %}">
+                                {{ a.4 }}
+                            </td>
+                            <td>
+                                <span class="badge bg-danger text-white">
+                                    Need {{ a.5 }} more
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'manager_add_purchase_order' %}?product_id={{ a.0 }}"
+                                    class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus me-1"></i>Create PO
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">No low stock alerts at this time.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

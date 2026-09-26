@@ -1,0 +1,114 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">View GRN Details</h1>
+            <a href="{% url 'manager_approve_grn' %}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <label class="text-muted small text-uppercase fw-bold">GRN Number</label>
+                                <p class="fw-bold mb-0" style="color: #fbbf24;">GRN-{{ grn.id|stringformat:"06d" }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="text-muted small text-uppercase fw-bold">GRN Date</label>
+                                <p class="mb-0">{{ grn.grn_date|date:"d-M-Y" }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="text-muted small text-uppercase fw-bold">PO Reference</label>
+                                <p class="mb-0">PO-{{ grn.po_id|stringformat:"06d" }} ({{ grn.po_date|date:"d-M-Y" }})</p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="text-muted small text-uppercase fw-bold">Status</label>
+                                <p class="mb-0 fw-bold">
+                                    {% if grn.status == 'Pending' %}
+                                        <span class="text-warning">PENDING</span>
+                                    {% elif grn.status == 'Approved' %}
+                                        <span class="text-success">APPROVED</span>
+                                    {% elif grn.status == 'Rejected' %}
+                                        <span class="text-danger">REJECTED</span>
+                                    {% else %}
+                                        {{ grn.status }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label class="text-muted small text-uppercase fw-bold">Supplier</label>
+                                <p class="mb-0 fw-bold" style="color: #fbbf24;">{{ grn.supplier_name }}</p>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-center">PO Qty</th>
+                                        <th class="text-center">Pending Qty</th>
+                                        <th class="text-center">Received Qty</th>
+                                        <th class="text-center">Unit</th>
+                                        <th class="text-right">Price</th>
+                                        <th class="text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in items %}
+                                    <tr>
+                                        <td>{{ item.product_name }}</td>
+                                        <td class="text-center">{{ item.po_qty }}</td>
+                                        <td class="text-center">{{ item.bal_qty }}</td>
+                                        <td class="text-center fw-bold">{{ item.quantity }}</td>
+                                        <td class="text-center">{{ item.unit_name }}</td>
+                                        <td class="text-right">₹{{ item.rate|floatformat:2 }}</td>
+                                        <td class="text-right">₹{{ item.total|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr style="background-color: rgba(251, 191, 36, 0.1);">
+                                        <td colspan="6" class="text-right fw-bold">Grand Total:</td>
+                                        <td class="text-right fw-bold" style="color: #fbbf24; font-size: 1.1rem;">
+                                            ₹{{ grand_total|floatformat:2 }}
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        {% if grn.status == 'Pending' %}
+                        <div class="mt-4 d-flex gap-2 justify-content-end">
+                            <a href="{% url 'manager_approve_grn_action' grn.id 2 %}"
+                                class="btn btn-success"
+                                onclick="return confirm('Approve this GRN and update stock?')">
+                                <i class="fas fa-check"></i> Approve GRN
+                            </a>
+                            <a href="{% url 'manager_approve_grn_action' grn.id 3 %}"
+                                class="btn btn-danger"
+                                onclick="return confirm('Reject this GRN?')">
+                                <i class="fas fa-times"></i> Reject GRN
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

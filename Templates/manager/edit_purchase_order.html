@@ -1,0 +1,296 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<style>
+    .card {
+        border-radius: 18px !important;
+        background: rgba(17, 24, 39, 0.6) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(251, 191, 36, 0.15) !important;
+    }
+    .card-header {
+        border-top-left-radius: 18px !important;
+        border-top-right-radius: 18px !important;
+        background: rgba(251, 191, 36, 0.1) !important;
+        border-bottom: 1px solid rgba(251, 191, 36, 0.2) !important;
+    }
+    .form-control,
+    .form-select {
+        border-radius: 12px !important;
+        background: rgba(31, 41, 55, 0.7) !important;
+        border: 1.5px solid rgba(251, 191, 36, 0.15) !important;
+        color: #e5e7eb !important;
+    }
+    .form-control:focus {
+        background: rgba(31, 41, 55, 0.9) !important;
+        border-color: #fbbf24 !important;
+        box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.1) !important;
+    }
+    .table {
+        border-radius: 12px;
+        overflow: hidden;
+        color: #f3f4f6 !important;
+    }
+    .table th {
+        background: rgba(251, 191, 36, 0.1) !important;
+        color: #fbbf24 !important;
+    }
+    .professional-btn {
+        padding: 10px 25px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .professional-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+</style>
+
+{% if has_grn %}
+<div class="alert alert-warning alert-dismissible fade show mx-4 mt-3">
+    <i class="fas fa-lock me-2"></i>
+    <strong>Notice:</strong> This Purchase Order is locked because a GRN has already been booked.
+    Fields are read-only.
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Edit Purchase Order            
+                {% if status.status|lower  == 'pending' %}
+                    <span style="color:orange;"><strong>[{{ status.status }}]</strong></span>
+                {% endif %}  
+                {% if status.status|lower  == 'rejected' %}
+                    <span style="color:red;"><strong>[{{ status.status }}]</strong></span>
+                {% endif %} 
+                {% if status.status|lower  == 'approved' %}
+                    <span style="color:green;"><strong>[{{ status.status }}]</strong></span>
+                {% endif %}
+            </h1>  
+        </div>  
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4"> 
+                    <div class="card-body">
+                        <form action="{% url 'manager_update_po' %}" method="post" id="poForm">
+                            {% csrf_token %}
+                            <input type="hidden" name="poid" value="{{ po.id }}">                            
+                            <input type="hidden" name="status_id" value="{{ po.status_id }}">
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small uppercase">PO Number</label>
+                                    <input type="text" class="form-control" value="PO-{{po.id|stringformat:'06d' }}" readonly style="opacity: 0.7;">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small uppercase">PO Date</label>
+                                    <input type="date" class="form-control" name="po_date" id="po_date"
+                                            value="{{ po.po_date|date:'Y-m-d' }}" 
+                                            {% if has_grn %}disabled{% endif %} required>
+                                </div>  
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small uppercase">Supplier</label>
+                                    <select class="form-control" name="supplier_id" {% if has_grn %}disabled{% endif %} required>
+                                        <option value="">-- Select Supplier --</option>
+                                        {% for s in suppliers %}
+                                            <option value="{{ s.id }}"
+                                                    {% if s.id == po.supplier_id %}selected{% endif %}>
+                                                    {{ s.supplier_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="itemsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th class="align-middle">Product</th>
+                                                    <th class="align-middle text-center">Unit</th>
+                                                    <th class="align-middle text-center" style="width:120px;">Quantity</th>
+                                                    <th class="align-middle text-right" style="width:150px;">Rate (₹)</th>
+                                                    <th class="align-middle text-right" style="width:180px;">Total (₹)</th>
+                                                    <th class="align-middle text-center" style="width:80px;"> 
+                                                        {% if not has_grn %}
+                                                        <button type="button" class="btn btn-primary btn-sm rounded-pill" id="addRow"><i class="fas fa-plus"></i></button>  
+                                                        {% endif %}
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in items %}
+                                                <tr class="item-row" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                                    <td>
+                                                        <select name="product_id[]" class="form-control product-select"
+                                                                {% if has_grn %}disabled{% endif %} required>
+                                                            <option value="">-- Select Product --</option>
+                                                            {% for p in products %}
+                                                                <option value="{{ p.id }}" data-price="{{ p.price }}" data-uom="{{ p.unit_name }}"
+                                                                    data-unit="{{ p.unit_id }}" {% if p.id == item.product_id %}selected{% endif %}>
+                                                                    {{ p.product_name }} - SKU: {{ p.sku }}
+                                                                </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </td>
+                                                    <td class="text-center">                                                                       
+                                                        <input type="hidden" name="unit[]" class="unit-select" value="{{ item.unit_id }}">
+                                                        <span class="unit-select-name text-white">
+                                                            {{ item.unit_name|default:"-" }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="qty-input form-control text-center" name="quantity[]" 
+                                                                value="{{ item.quantity }}" min="1" {% if has_grn %}disabled{% endif %} required> 
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" class="price-input form-control text-right"
+                                                         name="unit_price[]"  value="{{ item.unit_price}}"
+                                                         {% if has_grn %}disabled{% endif %}>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" class="linetotal form-control text-right" name="total[]" readonly style="background: rgba(0,0,0,0.2) !important;">
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {% if not has_grn %}
+                                                            <button type="button" class="btn btn-outline-danger btn-sm remove-row border-0">
+                                                               <i class="fas fa-trash"></i></button> 
+                                                        {% endif %} 
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr class="item-row">
+                                                    <td>
+                                                        <select name="product_id[]" class="form-control product-select" required>
+                                                            <option value="">-- Select Product --</option>
+                                                            {% for p in products %}
+                                                                <option value="{{ p.id }}" data-price="{{ p.price }}" data-uom="{{ p.unit_name }}"
+                                                                    data-unit="{{ p.unit_id }}">{{ p.product_name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </td>
+                                                    <td class="text-center">                                                                       
+                                                        <input type="hidden" name="unit[]" class="unit-select">
+                                                        <span class="unit-select-name">-</span>
+                                                    </td>
+                                                    <td><input type="number" class="qty-input form-control text-center" name="quantity[]" min="1" value="1" required></td>
+                                                    <td><input type="number" step="0.01" class="price-input form-control text-right" name="unit_price[]"></td>
+                                                    <td><input type="number" step="0.01" class="linetotal form-control text-right" name="total[]" readonly></td>
+                                                    <td class="text-center"><button type="button" class="btn btn-outline-danger btn-sm remove-row border-0"><i class="fas fa-trash"></i></button></td>
+                                                </tr>
+                                                {% endfor %}  
+                                                <tr class="bg-transparent">
+                                                    <td colspan="4" class="text-right border-0 py-3 fw-bold text-muted uppercase small">Total PO Value (₹)</td>
+                                                    <td class="border-0 py-3">
+                                                        <input type="number" id="grandTotalDisplay" class="total-input form-control text-right fw-bold" readonly style="border-color: #fbbf24 !important; color: #fbbf24 !important;"> 
+                                                    </td>
+                                                    <td class="border-0"></td>
+                                                </tr>                                             
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-3 mt-4">
+                                <a href="{% url 'manager_approve_po' %}" class="professional-btn" style="background: rgba(107, 114, 128, 0.2); color: #d1d5db;">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                                <button type="submit" class="professional-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </div>
+</main> 
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function () {
+
+    function calculateGrandTotal() {
+        let grandTotal = 0;
+        $('.linetotal').each(function () {
+            let val = parseFloat($(this).val()) || 0;
+            grandTotal += val;
+        });
+        $('#grandTotalDisplay').val(grandTotal.toFixed(2));
+    }
+
+    function calculateRowTotal(row) {
+        let qty = parseFloat(row.find('.qty-input').val()) || 0;
+        let price = parseFloat(row.find('.price-input').val()) || 0;
+        let total = qty * price;
+        row.find('.linetotal').val(total.toFixed(2)); 
+        calculateGrandTotal();
+    }
+
+    // Initial calculation for existing rows
+    $('.item-row').each(function () {
+        calculateRowTotal($(this));
+    });
+
+    $('#addRow').click(function () {
+        let firstRow = $('.item-row:first');
+        let newRow = firstRow.clone();
+
+        newRow.find('input').val('');
+        newRow.find('select').val('');
+        newRow.find('.unit-select-name').text('-');
+        newRow.find('.qty-input').val('1');
+        newRow.find('.linetotal').val('0.00');
+        newRow.find('select, input').prop('disabled', false).prop('readonly', false);
+        
+        // Remove style attributes except those needed
+        newRow.find('.linetotal').css('background', 'rgba(0,0,0,0.2) !important');
+
+        $('#itemsTable tbody tr').last().before(newRow);
+    });
+
+    $(document).on('click', '.remove-row', function () {
+        if ($('.item-row').length > 1) {
+            $(this).closest('tr').remove();
+            calculateGrandTotal();
+        } else {
+            alert("At least one item is required.");
+        }
+    });
+
+    $(document).on('change', '.product-select', function () {
+        let option = $(this).find(':selected');
+        let price = option.data('price') || 0;
+        let unitId = option.data('unit');
+        let unitName = option.data('uom');
+        let row = $(this).closest('tr');
+
+        row.find('.price-input').val(parseFloat(price).toFixed(2));
+        if (unitId) {
+            row.find('.unit-select').val(unitId);
+            row.find('.unit-select-name').text(unitName);
+        }
+        calculateRowTotal(row);
+    });
+
+    $(document).on('input', '.qty-input, .price-input', function () {
+        calculateRowTotal($(this).closest('tr'));
+    });
+
+});
+</script>
+{% endblock %}

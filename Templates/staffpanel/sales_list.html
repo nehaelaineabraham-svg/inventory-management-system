@@ -1,0 +1,72 @@
+{% extends 'staffpanel/staff_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Sales</h1>
+            
+            <div class="d-flex align-items-center gap-3">
+                <a href="{% url 'staff_create_sales' %}"
+                    class="btn btn-sm text-white" style="background-color: green !important;">
+                    <i class="fas fa-plus me-1"></i>New
+                </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div id="salesTableContainer" class="card-body">
+                        {% include 'staffpanel/sales_table_partial.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    let searchTimer;
+    const searchInput = document.getElementById('liveSearch');
+    const clearBtn = document.getElementById('clearSearch');
+    const container = document.getElementById('salesTableContainer');
+
+    searchInput.addEventListener('input', function() {
+        clearBtn.style.display = this.value ? 'block' : 'none';
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            fetchPage(1);
+        }, 300);
+    });
+
+    clearBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        this.style.display = 'none';
+        fetchPage(1);
+    });
+
+    function fetchPage(page) {
+        const query = searchInput.value;
+        const url = `{% url 'staff_sales_list' %}?page=${page}&sale_search=${encodeURIComponent(query)}&ajax=1`;
+        
+        container.style.opacity = '0.5';
+        
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                container.innerHTML = html;
+                container.style.opacity = '1';
+                // Scroll to top of table
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            })
+            .catch(err => {
+                console.error('Fetch failed:', err);
+                container.style.opacity = '1';
+            });
+    }
+</script>
+
+{% endblock %}

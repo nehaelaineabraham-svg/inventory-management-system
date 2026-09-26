@@ -1,0 +1,215 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4">
+        <!-- Header Section -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Users</h1>
+
+            <div class="d-flex align-items-center gap-2">
+                <a href="{% url 'user_activity_logs' %}" class="btn btn-sm btn-info text-white">
+                    <i class="fas fa-history"></i> Logs
+                </a>
+                <button type="button" class="btn btn-sm text-white" style="background-color: green !important;"
+                    data-toggle="modal" data-target="#addUserModal">
+                    <i class="fas fa-plus"></i> New
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th class="text-center">Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in users %}
+                                <tr>
+                                    <td>{{ u.name }}</td>
+                                    <td>{{ u.email }}</td>
+                                    <td>{{ u.role|title }}</td>
+                                    <td class="text-center">
+                                        {% if u.status == 1 %}
+                                        <span style="color:green;">Active</span>
+                                        {% else %}
+                                        <span style="color:red;">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'edit_user' u.id %}" title="Edit"
+                                                class="btn btn-warning btn-sm text-white d-inline-flex align-items-center">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'delete_user' u.id %}" title="Delete"
+                                                class="btn btn-danger btn-sm d-inline-flex align-items-center"
+                                                onclick="return confirm('Are you sure?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                            {% if u.status == 1 %}
+                                            <a href="{% url 'deactivate_user' u.id %}" title="Deactivate"
+                                                class="btn btn-secondary btn-sm d-inline-flex align-items-center"
+                                                onclick="return confirm('Deactivate this user?')">
+                                                <i class="fas fa-ban"></i>
+                                            </a>
+                                            {% else %}
+                                            <a href="{% url 'activate_user' u.id %}" title="Activate"
+                                                class="btn btn-success btn-sm d-inline-flex align-items-center"
+                                                onclick="return confirm('Activate this user?')">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination Section - Minimalist Pill -->
+                        <div class="d-flex justify-content-center mt-5">
+                            <div class="pagination-pill-container">
+                                <!-- Info Section -->
+                                <div class="pagination-info-pill text-center">
+                                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of
+                                    {{ page_obj.paginator.count }} entries
+                                </div>
+
+                                <!-- Separator -->
+                                <div class="pagination-separator"></div>
+
+                                <!-- Navigation Wrapper -->
+                                <div class="pagination-wrapper-pill text-center">
+                                    {% if page_obj.has_previous %}
+                                    <a class="page-link pagination-link-pill pagination-nav-btn" href="?page=1"><i
+                                            class="fas fa-angle-double-left"></i></a>
+                                    <a class="page-link pagination-link-pill pagination-nav-btn"
+                                        href="?page={{ page_obj.previous_page_number }}"><i
+                                            class="fas fa-angle-left"></i></a>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <a class="page-link pagination-link-pill active" href="#">{{ num }}</a>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
+                                        class="page-link pagination-link-pill" href="?page={{ num }}">{{ num }}</a>
+                                        {% endif %}
+                                        {% endfor %}
+
+                                        {% if page_obj.has_next %}
+                                        <a class="page-link pagination-link-pill pagination-nav-btn"
+                                            href="?page={{ page_obj.next_page_number }}"><i
+                                                class="fas fa-angle-right"></i></a>
+                                        <a class="page-link pagination-link-pill pagination-nav-btn"
+                                            href="?page={{ page_obj.paginator.num_pages }}"><i
+                                                class="fas fa-angle-double-right"></i></a>
+                                        {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content professional-modal-content">
+            <div class="professional-modal-header">
+                <div class="modal-header-content">
+                    <i class="fas fa-user-plus modal-header-icon"></i>
+                    <div>
+                        <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
+                        <p class="modal-subtitle">Register a new system user with specific access rights</p>
+                    </div>
+                </div>
+                <button type="button" class="professional-btn-close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{% url 'save_user' %}" method="post">
+                {% csrf_token %}
+                <div class="professional-modal-body">
+                    <div class="form-section">
+                        <h6 class="form-section-title">User Account Information</h6>
+                        <div class="form-row">
+                            <div class="form-col-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <span class="label-text">Full Name</span>
+                                        <span class="required-indicator">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="name" required
+                                        placeholder="Enter full name">
+                                </div>
+                            </div>
+                            <div class="form-col-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <span class="label-text">Email Address</span>
+                                        <span class="required-indicator">*</span>
+                                    </label>
+                                    <input type="email" class="form-control" name="email" required
+                                        placeholder="user@example.com">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row mt-3">
+                            <div class="form-col-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <span class="label-text">Role</span>
+                                        <span class="required-indicator">*</span>
+                                    </label>
+                                    <select class="form-control" name="role" required>
+                                        <option value="" disabled selected>Select Role</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="manager">Manager</option>
+                                        <option value="staff">Staff</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-col-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <span class="label-text">Password</span>
+                                        <span class="required-indicator">*</span>
+                                    </label>
+                                    <input type="password" class="form-control" name="password" required
+                                        placeholder="Create password">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="professional-modal-footer">
+                    <button type="button" class="professional-btn professional-btn-cancel" data-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button type="submit" class="professional-btn professional-btn-submit">
+                        <i class="fas fa-save me-2"></i>Save User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

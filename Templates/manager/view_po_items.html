@@ -1,0 +1,157 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<style>
+    .card {
+        border-radius: 18px !important;
+        background: rgba(17, 24, 39, 0.6) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(251, 191, 36, 0.15) !important;
+    }
+    .info-label {
+        color: #9ca3af;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    .info-value {
+        color: #f3f4f6;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+    .table {
+        border-radius: 12px;
+        overflow: hidden;
+        color: #f3f4f6 !important;
+    }
+    .table th {
+        background: rgba(251, 191, 36, 0.1) !important;
+        color: #fbbf24 !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+    .table td {
+        vertical-align: middle;
+        border-color: rgba(255, 255, 255, 0.05) !important;
+    }
+    .grand-total-row {
+        background: rgba(251, 191, 36, 0.05) !important;
+    }
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 10px;
+        background: rgba(107, 114, 128, 0.2);
+        color: #d1d5db;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    .back-btn:hover {
+        background: rgba(107, 114, 128, 0.3);
+        color: #fff;
+        transform: translateX(-4px);
+    }
+</style>
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Purchase Order Details</h1>  
+            <a href="{% url 'manager_approve_po' %}" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>   
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4">                
+                {% for pos in po %}
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="info-label">PO Number</div>
+                            <div class="info-value">PO-{{pos.id|stringformat:"06d" }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-label">PO Date</div>
+                            <div class="info-value">{{ pos.po_date|date:"d-M-Y" }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-label">Supplier</div>
+                            <div class="info-value">{{ supplier.supplier_name }}</div>
+                        </div>
+                        <div class="col-md-2 text-md-end">
+                            <div class="info-label">Status</div>
+                            <div class="mt-1">
+                                {% if pos.status|lower == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% elif pos.status|lower == 'approved' %}
+                                    <span class="badge bg-success">Approved</span>
+                                {% elif pos.status|lower == 'rejected' %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                {% else %}
+                                    <span class="badge bg-info">{{ pos.status }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div> 
+                {% endfor %}                
+
+                <div class="row">
+                    <div class="col-12 mt-2">
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" style="width: 60px;">#</th>
+                                        <th>Product Name</th>
+                                        <th class="text-center" style="width: 100px;">Unit</th>
+                                        <th class="text-center" style="width: 120px;">Quantity</th>
+                                        <th class="text-right" style="width: 150px;">Rate (₹)</th>
+                                        <th class="text-right" style="width: 180px;">Total (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in items %}
+                                    <tr>
+                                        <td class="text-center text-muted">{{ forloop.counter }}</td>
+                                        <td class="fw-500">{{ item.product_name }}</td>
+                                        <td class="text-center">{{ item.unit_name|default:"-" }}</td>
+                                        <td class="text-center">{{ item.quantity }}</td>
+                                        <td class="text-right">{{ item.unit_price|floatformat:2 }}</td>
+                                        <td class="text-right fw-600">{{ item.total_price|floatformat:2 }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4 text-muted">
+                                            No items found for this Purchase Order.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr class="grand-total-row">
+                                        <td colspan="5" class="text-right border-0 py-3">
+                                            <span class="fw-bold text-muted small uppercase me-2">Grand Total</span>
+                                        </td>
+                                        <td class="text-right border-0 py-3">
+                                            <span class="fw-bold" style="color: #fbbf24; font-size: 1.1rem;">₹ {{ grand_total|floatformat:2 }}</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

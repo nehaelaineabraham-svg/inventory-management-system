@@ -1,0 +1,85 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card mb-4 mt-4">
+                    <div class="card-header">
+                        <i class="fas fa-user-edit"></i>
+                        Edit User Details
+                    </div>
+
+                    <div class="card-body">
+                        <form action="{% url 'update_user' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="uid" value="{{ user.id }}">
+
+                            <div class="form-row">
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Full Name <span
+                                                class="required-indicator">*</span></label>
+                                        <input type="text" class="form-control w-100" name="name"
+                                            value="{{ user.name }}" required>
+                                    </div>
+                                </div>
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Email Address <span
+                                                class="required-indicator">*</span></label>
+                                        <input type="email" class="form-control w-100" name="email"
+                                            value="{{ user.email }}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row mt-3">
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Role <span class="required-indicator">*</span></label>
+                                        <select class="form-control w-100" name="role" required>
+                                            <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin
+                                            </option>
+                                            <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>
+                                                Manager</option>
+                                            <option value="staff" {% if user.role == 'staff' %}selected{% endif %}>Staff
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Password <span
+                                                class="required-indicator">*</span></label>
+                                        <input type="password" class="form-control w-100" name="password"
+                                            value="{{ user.password }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-row">   
+                                <div class="form-col-12 d-flex align-items-end justify-content-end">                                     
+                                    <div class="button-group">
+                                        <button type="submit" class="professional-btn text-white" style="background-color:darkgreen !important;">
+                                            <span class="fas fa-save" ></span>&nbsp;Update
+                                        </button>
+                                        <a href="{% url 'users' %}" class="professional-btn professional-btn-cancel"
+                                            style="background-color:red !important;">
+                                            <i class="fas fa-cancel"></i>&nbsp;Cancel
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

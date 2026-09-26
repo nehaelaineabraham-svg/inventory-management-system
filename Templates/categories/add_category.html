@@ -1,0 +1,47 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-edit"></i>
+                        New Category
+                    </div>
+                    <div class="card-body">
+                        <form action="{% url 'save_category' %}" method="post">
+                            {% csrf_token %}
+                            <div class="form-row">
+                                <div class="form-col-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Category Name <span
+                                                class="required-indicator">*</span></label>
+                                        <input type="text" class="form-control w-100" name="cat_name"
+                                            value="{{category.cat_name}}" required>
+                                    </div>
+                                </div>  
+                                <div class="form-col-6 d-flex align-items-end justify-content-end">                                    
+                                    <div class="button-group">
+                                        <button type="submit" class="professional-btn text-white" style="background-color:darkgreen !important;">
+                                            <span class="fas fa-save" ></span>&nbsp;Save
+                                        </button>
+                                        <a href="{% url 'categories' %}" class="professional-btn professional-btn-cancel"
+                                            style="background-color:red !important;">
+                                            <i class="fas fa-cancel"></i>&nbsp;Cancel
+                                        </a>
+                                    </div>
+                                </div> 
+                            </div> 
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

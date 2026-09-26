@@ -1,0 +1,93 @@
+{% extends 'staffpanel/staff_layout.html' %}
+{% load static %}
+{% block content %}
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Record Received Items</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'staff_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'staff_enter_grn' %}">Pending POs</a></li>
+            <li class="breadcrumb-item active">Enter Stock</li>
+        </ol>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-plus me-1"></i>
+                Recording Stock for <strong>PO-{{ po.id }}</strong>
+            </div>
+            <div class="card-body">
+                <form action="{% url 'staff_save_grn' %}" method="post" id="grnForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="po_id" value="{{ po.id }}">
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Purchase Order</label>
+                            <input type="text" class="form-control" value="PO-{{ po.id }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">PO Status After GRN</label>
+                            <input type="hidden" name="po_status" value="RECEIVED">
+                            <div class="form-control bg-light text-success fw-bold">
+                                <i class="fas fa-check-circle me-1"></i> Will be set to RECEIVED
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mb-3">
+                        <table class="table table-bordered">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 25%;">Product</th>
+                                    <th style="width: 10%;">Ordered</th>
+                                    <th style="width: 12%;">Received Qty</th>
+                                    <th>Batch No</th>
+                                    <th>Expiry Date</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr class="item-row">
+                                    <td>
+                                        <input type="hidden" name="product_id[]" value="{{ item.product_id }}">
+                                        <strong>{{ item.product_name }}</strong><br>
+                                        <small class="text-muted">Unit: {{ item.unit }}</small>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control" value="{{ item.quantity }}" readonly>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control qty-input" name="qty[]" min="0"
+                                            step="0.01" value="{{ item.quantity }}" required>
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control" name="batch_no[]" placeholder="Batch">
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control" name="location[]"
+                                            placeholder="e.g. A1-20">
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <small><i class="fas fa-info-circle"></i> Verify all quantities. Changes will update Current
+                            Stock immediately.</small>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i> Save GRN & Update Stock
+                        </button>
+                        <a href="{% url 'staff_enter_grn' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

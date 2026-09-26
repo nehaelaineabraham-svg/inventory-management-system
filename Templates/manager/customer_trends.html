@@ -1,0 +1,83 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Customer Trends</h1>
+            <div></div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4"
+                    style="background: rgba(17, 24, 39, 0.6) !important; backdrop-filter: blur(10px); border: 1px solid rgba(251, 191, 36, 0.15) !important;">
+                    <div class="card-body">
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Customer Name</th>
+                                    <th class="text-center">Total Sales Transactions</th>
+                                    <th class="text-center">Last Sale Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in trends_data %}
+                                <tr>
+                                    <td>{{ row.1 }}</td>
+                                    <td class="text-center">{{ row.2 }}</td>
+                                    <td class="text-center">{{ row.3|date:"d-M-Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No records found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <div class="d-flex justify-content-center mt-5">
+                            <div class="pagination-pill-container">
+                                <div class="pagination-info-pill text-center">
+                                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of
+                                    {{ page_obj.paginator.count }} entries
+                                </div>
+                                <div class="pagination-separator"></div>
+                                <div class="pagination-wrapper-pill text-center">
+                                    {% if page_obj.has_previous %}
+                                    <a class="page-link pagination-link-pill pagination-nav-btn" href="?page=1">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                    <a class="page-link pagination-link-pill pagination-nav-btn" href="?page={{ page_obj.previous_page_number }}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <a class="page-link pagination-link-pill active" href="javascript:void(0)">{{ num }}</a>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <a class="page-link pagination-link-pill" href="?page={{ num }}">{{ num }}</a>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if page_obj.has_next %}
+                                    <a class="page-link pagination-link-pill pagination-nav-btn" href="?page={{ page_obj.next_page_number }}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                    <a class="page-link pagination-link-pill pagination-nav-btn" href="?page={{ page_obj.paginator.num_pages }}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

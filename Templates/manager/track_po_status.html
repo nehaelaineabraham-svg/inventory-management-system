@@ -1,0 +1,146 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<style>
+    .card {
+        border-radius: 18px !important;
+        background: rgba(17, 24, 39, 0.6) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(251, 191, 36, 0.15) !important;
+    }
+    .info-label {
+        color: #9ca3af;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    .info-value {
+        color: #f3f4f6;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+    .table {
+        border-radius: 12px;
+        overflow: hidden;
+        color: #f3f4f6 !important;
+    }
+    .table th {
+        background: rgba(251, 191, 36, 0.1) !important;
+        color: #fbbf24 !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+    .table td {
+        vertical-align: middle;
+        border-color: rgba(255, 255, 255, 0.05) !important;
+    }
+    .professional-btn {
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+    .professional-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+</style>
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Track Purchase Order Status</h1>  
+        </div>   
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4">                
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="info-label">PO Number</div>
+                        <div class="info-value">PO-{{po.id|stringformat:"06d" }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="info-label">PO Date</div>
+                        <div class="info-value">{{ po.po_date|date:"d-M-Y" }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-label">Supplier</div>
+                        <div class="info-value">{{ supplier.supplier_name }}</div>
+                    </div>
+                    <div class="col-md-2 text-md-end">
+                        <div class="info-label">Current Status</div>
+                        <div class="mt-1">
+                            {% if po.status_id == 1 %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% elif po.status_id == 2 %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif po.status_id == 3 %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% else %}
+                                <span class="badge bg-info">{{ po.status }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div> 
+
+                <div class="row">
+                    <div class="col-12 mt-2">
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-4">
+                                <thead>
+                                    <tr>
+                                        <th>Product Name</th>
+                                        <th class="text-center" style="width: 120px;">Quantity</th>
+                                        <th class="text-right" style="width: 150px;">Unit Price (₹)</th>
+                                        <th class="text-right" style="width: 180px;">Total Price (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in items %}
+                                    <tr>
+                                        <td class="fw-500">{{ item.1 }}</td> <!-- Product Name -->
+                                        <td class="text-center">{{ item.2 }}</td> <!-- Quantity -->
+                                        <td class="text-right">{{ item.3|floatformat:2 }}</td> <!-- Unit Price -->
+                                        <td class="text-right fw-600">{{ item.4|floatformat:2 }}</td> <!-- Total Price -->
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted">
+                                            No items found for this Purchase Order.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div> 
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-3 mt-2">
+                    <a href="{% url 'manager_purchase_report' %}" class="professional-btn" style="background: rgba(107, 114, 128, 0.2); color: #d1d5db;">
+                         Back to Report
+                    </a>
+                    {% if po.status_id == 1 %}
+                    <a href="{% url 'manager_edit_po' po.id %}" class="professional-btn" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000;">
+                        <i class="fas fa-edit"></i> Edit PO
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

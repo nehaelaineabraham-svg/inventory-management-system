@@ -1,0 +1,203 @@
+{% extends 'staffpanel/staff_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">New GRN</h1>  
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4"> 
+                    <div class="card-body">
+                        <form action="{% url 'staff_save_grn' %}" method="post">
+                            {% csrf_token %}                        
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label class="form-label">GRN Number</label>
+                                    <input type="text" class="form-control" value="{{ grn_no }}" readonly>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">GRN Date</label>
+                                    <input type="date" class="form-control" name="grn_date" required id="grn_date">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Purchase Order</label>
+                                    <select class="form-control" name="po_id" id="po_id" required>
+                                        <option value="">-- Select PO --</option>
+                                        {% for po in purchase_orders %}
+                                            <option value="{{po.id}}">
+                                                PO-{{po.id|stringformat:"06d" }} ({{po.po_date|date:"d-M-Y"}}) 
+                                            </option>        
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row" style="height: 10px;"></div>
+                            <div class="row">
+                                <div class="col-md-1 " >
+                                    <label class="form-label mt-1">Supplier</label>                          
+                                </div>
+                                <div class="col-md-7">                              
+                                    <input type="text" class="form-control" id="supplier_name" readonly>
+                                </div>
+                            </div>                                
+                            <div class="row">
+                                <div class="col-12 mt-2">
+                                    <div class="table-responsive">  
+                                        <table class="table table-bordered table-striped" id="grnTable">
+                                            <thead class="table-dark text-center">
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th style="width: 80px;">PO Qty</th>
+                                                    <th style="width: 100px;">Pend. Qty</th>
+                                                    <th style="width: 120px;">GRN Qty</th>
+                                                    <th class="text-center">Unit</th>
+                                                    <th class="text-right">Rate</th>
+                                                    <th class="text-right">Total</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-row">                                
+                                <div class="form-col-12 d-flex align-items-end justify-content-end">                                    
+                                    <div class="button-group">
+                                        <button type="submit" class="professional-btn text-white" style="background-color:darkgreen !important;">
+                                            <span class="fas fa-save" ></span>&nbsp;Save
+                                        </button>
+                                        <a href="{% url 'staff_grn_list' %}" class="professional-btn professional-btn-cancel"
+                                            style="background-color:red !important;">
+                                            <i class="fas fa-cancel"></i>&nbsp;Cancel
+                                        </a>
+                                    </div>
+                                </div> 
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script> 
+    $(document).ready(function () {
+        // Set today's date as default
+        var today = new Date().toISOString().split('T')[0];
+        $('#grn_date').val(today); 
+        
+        // Calculate total on qty or price change
+        $(document).on('input', '.received_qty', function () {
+            calculateRowTotal($(this).closest('tr'));
+        });
+        
+        function calculateRowTotal(row) {
+            var qty = row.find('.received_qty').val() || 0;
+            var price = row.find('.price-input').val() || 0;
+            var total = (parseFloat(qty) * parseFloat(price)).toFixed(2);
+            row.find('.linetotal').val(total);
+            row.find('.linetotaltext').text(total);
+        }
+    });
+
+    document.getElementById("po_id").addEventListener("change", function () {
+        const poId = this.value;
+        const tableBody = document.querySelector("#grnTable tbody");
+        const supplierField = document.getElementById("supplier_name");
+
+        tableBody.innerHTML = "";
+        supplierField.value = "";
+        if (!poId) return;
+        
+        // Use staff version of the AJAX endpoint
+        fetch("{% url 'staff_view_po_items_for_grn' 0 %}".replace("0", poId))
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                supplierField.value = data.supplier;
+                data.products.forEach(product => {
+                    let receivedColumn = "";
+                    let actionColumn = "";
+                    if (product.is_completed) {
+                        // FULLY RECEIVED
+                        receivedColumn = `
+                            <span class="text-success fw-bold">
+                                ${product.ordered_qty}
+                            </span>
+                        `;
+                        actionColumn = `
+                            <span class="badge bg-success">
+                                Received
+                            </span>
+                        `;
+                    } else {
+                        // NOT FULLY RECEIVED
+                        receivedColumn = `
+                            <input type="number"
+                                class="form-control received_qty"
+                                name="quantity[]"
+                                min="0"
+                                max="${product.remaining_qty}">
+                        `;
+                        actionColumn = `
+                            <button type="button"
+                                    class="btn btn-danger btn-sm deleteRow">
+                                <span class="fas fa-trash"></span>
+                            </button>
+                        `;
+                    }
+                    tableBody.insertAdjacentHTML("beforeend", `
+                        <tr>
+                            <td>
+                                ${product.product_name}
+                                <input type="hidden" name="product_id[]" value="${product.product_id}">
+                            </td>
+                            <td class="text-center">${product.ordered_qty}               
+                                <input type="hidden" name="poq[]" value="${product.ordered_qty}"></td>
+                            <td class="text-center">${product.remaining_qty}                                    
+                                <input type="hidden" name="bal[]" value="${product.remaining_qty}"></td>
+                            <td>${receivedColumn}</td>
+                            <td class="text-center">
+                                ${product.unit_name}
+                                <input type="hidden" name="unit[]" value="${product.unit}">
+                            </td>
+                            <td class="text-right">${Number(product.rate).toFixed(2)}
+                                <input type="hidden" name="rate[]" class="price-input" value="${product.rate}">
+                            </td>
+                            <td class="text-right linetotaltext">${Number(product.total).toFixed(2)}
+                                <input type="hidden" name="linetotal[]" class="linetotal"  value="${product.total}">
+                            </td>
+                            <td class="text-center">${actionColumn}</td>
+                        </tr>
+                    `);
+                });
+            });
+    });
+
+    document.querySelector("#grnTable").addEventListener("click", function(e){
+        if(e.target.closest(".deleteRow")){
+            let row = e.target.closest("tr");
+            let qtyInput = row.querySelector(".received_qty");
+            if(qtyInput && qtyInput.value && qtyInput.value > 0){
+                alert("Cannot delete. Quantity already entered.");
+                return;
+            }
+            row.remove();
+        }
+    });
+</script>
+{% endblock %}

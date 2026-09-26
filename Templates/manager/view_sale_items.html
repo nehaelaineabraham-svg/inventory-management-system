@@ -1,0 +1,78 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Sale Details</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'manager_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'manager_sales_report' %}">Sales Report</a></li>
+            <li class="breadcrumb-item active">Sale #{{ sale.id }}</li>
+        </ol>
+
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-shopping-cart me-1"></i>
+                Sale Information - ID: {{ sale.id }}
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5>Customer Details</h5>
+                        <p>
+                            <strong>Name:</strong> {{ customer.customer_name|default:"Walking Customer" }}<br>
+                            <strong>Phone:</strong> {{ customer.phone|default:"N/A" }}<br>
+                            <strong>Email:</strong> {{ customer.email|default:"N/A" }}
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <h5>Transaction Details</h5>
+                        <p>
+                            <strong>Date:</strong> {{ sale.created_at|date:'Y-m-d H:i' }}<br>
+                            <strong>Invoice # :</strong> INV-{{ sale.id|add:1000 }}
+                        </p>
+                    </div>
+                </div>
+
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Product</th>
+                            <th>Unit</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.product_name }}</td>
+                            <td>{{ item.unit }}</td>
+                            <td>{{ item.qty }}</td>
+                            <td>₹{{ item.price }}</td>
+                            <td>₹{{ item.subtotal }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4" class="text-right">Grand Total</th>
+                            <th>₹{{ total_sale_value }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="mt-4 no-print text-center">
+                    <button onclick="window.print();" class="btn btn-secondary mr-2">
+                        <i class="fas fa-print"></i> Print Invoice
+                    </button>
+                    <a href="{% url 'manager_sales_report' %}" class="btn btn-primary">Back to Sales</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

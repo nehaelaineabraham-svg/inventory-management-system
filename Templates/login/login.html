@@ -1,0 +1,238 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IIMS - Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: #ffffff;
+            padding: 45px 35px;
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-card h2 {
+            text-align: center;
+            color: #0f2027;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .login-card p {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            color: #333;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            transition: 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #2c5364;
+            outline: none;
+            box-shadow: 0 0 8px rgba(44, 83, 100, 0.3);
+        }
+
+        .forgot {
+            text-align: right;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .forgot a {
+            color: #2c5364;
+            text-decoration: none;
+        }
+
+        .forgot a:hover {
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(120deg, #203a43, #2c5364);
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .login-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .alert-error {
+            background: #ffe5e5;
+            color: #cc0000;
+        }
+
+        .alert-success {
+            background: #e6ffed;
+            color: #008a2e;
+        }
+
+        /* Loading Overlay */
+        .loading {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.4s ease;
+        }
+
+        .loading.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #ffffff;
+            border-top: 5px solid #203a43;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 15px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <h2>Welcome </h2>
+        <p>Login to access Intelligent Inventory System</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="{% url 'check_login' %}" id="loginForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required>
+            </div>
+
+            <div class="forgot">
+                <a href="{% url 'forgot_password' %}">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="login-btn">
+                Sign In
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Loading Animation -->
+<div class="loading" id="loadingScreen">
+    <div class="spinner"></div>
+    <div class="loading-text">Signing you in...</div>
+</div>
+
+<script>
+    const form = document.getElementById("loginForm");
+    const loading = document.getElementById("loadingScreen");
+
+    form.addEventListener("submit", function () {
+        loading.classList.add("active");
+    });
+</script>
+
+</body>
+</html>

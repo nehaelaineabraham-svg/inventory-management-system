@@ -1,0 +1,77 @@
+{% extends 'staffpanel/staff_layout.html' %}
+{% load static %}
+{% block content %}
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">GRN Details</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'staff_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'staff_enter_grn' %}">GRNs</a></li>
+            <li class="breadcrumb-item active">View GRN for PO-{{ po.id }}</li>
+        </ol>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-info-circle me-1"></i>
+                GRN Overview
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label class="fw-bold">Purchase Order:</label>
+                        <p class="mb-0">PO-{{ po.id }} <span class="badge bg-success ms-2">{{ po.status }}</span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="fw-bold">Supplier:</label>
+                        <p class="mb-0">{{ supplier.supplier_name|default:"Unknown" }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="fw-bold">PO Date:</label>
+                        <p class="mb-0">{{ po.po_date }}</p>
+                    </div>
+                </div>
+
+                <h5 class="mt-4">Items Received</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>GRN ID</th>
+                                <th>Product Name</th>
+                                <th>Received Qty</th>
+                                <th>Batch No</th>
+                                <th>Expiry Date</th>
+                                <th>Location</th>
+                                <th>Recorded On</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in grn_items %}
+                            <tr>
+                                <td>GRN-{{ item.0 }}</td>
+                                <td>{{ item.1 }}</td>
+                                <td class="fw-bold">{{ item.2 }}</td>
+                                <td>{{ item.3|default:"—" }}</td>
+                                <td>{{ item.4|default:"—" }}</td>
+                                <td>{{ item.5|default:"—" }}</td>
+                                <td>{{ item.6 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No items found for this record.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-3">
+                    <a href="{% url 'staff_enter_grn' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

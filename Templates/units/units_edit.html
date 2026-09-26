@@ -1,0 +1,41 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Edit Unit</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'units' %}">Units</a></li>
+            <li class="breadcrumb-item active">Edit Unit</li>
+        </ol>
+
+        <div class="row">
+            <div class="col-xl-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-edit me-1"></i>
+                        Edit Unit Details
+                    </div>
+                    <div class="card-body">
+                        <form action="{% url 'update_unit' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="uid" value="{{unit.unit_id}}">
+
+                            <div class="form-group mb-3">
+                                <label>Unit Name</label>
+                                <input type="text" class="form-control" name="unit_name" value="{{unit.unit_name}}"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Update" class="btn btn-success">
+                                <a href="{% url 'units' %}" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

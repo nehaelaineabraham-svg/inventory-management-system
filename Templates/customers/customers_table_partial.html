@@ -1,0 +1,84 @@
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th class="text-center">ID</th>
+            <th>Customer Name</th>
+            <th class="text-center">Phone</th>
+            <th>Email</th>
+            <th class="text-center">Location</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if customers %}
+        {% for c in customers %}
+        <tr>
+            <td class="text-center">{{c.id}}</td>
+            <td>{{c.customer_name}}</td>
+            <td class="text-center">{{c.phone}}</td>
+            <td>{{c.email}}</td>
+            <td class="text-center">{{c.place}}</td>
+            <td>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'edit_customer' c.id %}" title="Edit"
+                        class="btn btn-warning btn-sm text-white d-inline-flex align-items-center gap-1">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'delete_customer' c.id %}"
+                        class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1 ml-1"
+                        onclick="return confirm('Are you sure?')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="6" class="text-center py-4 text-muted">No customers found matching your search.</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<!-- Pagination Section - Minimalist Pill -->
+<div class="d-flex justify-content-center mt-5">
+    <div class="pagination-pill-container">
+        <!-- Info Section -->
+        <div class="pagination-info-pill text-center">
+            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of
+            {{ page_obj.paginator.count }} entries
+        </div>
+
+        <!-- Separator -->
+        <div class="pagination-separator"></div>
+
+        <!-- Navigation Wrapper -->
+        <div class="pagination-wrapper-pill text-center">
+            {% if page_obj.has_previous %}
+            <a class="page-link pagination-link-pill pagination-nav-btn" href="#" onclick="fetchPage(1); return false;"><i
+                    class="fas fa-angle-double-left"></i></a>
+            <a class="page-link pagination-link-pill pagination-nav-btn"
+                href="#" onclick="fetchPage({{ page_obj.previous_page_number }}); return false;"><i
+                    class="fas fa-angle-left"></i></a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <a class="page-link pagination-link-pill active" href="#">{{ num }}</a>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} 
+            <a class="page-link pagination-link-pill" href="#" onclick="fetchPage({{ num }}); return false;">{{ num }}</a>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a class="page-link pagination-link-pill pagination-nav-btn"
+                href="#" onclick="fetchPage({{ page_obj.next_page_number }}); return false;"><i
+                    class="fas fa-angle-right"></i></a>
+            <a class="page-link pagination-link-pill pagination-nav-btn"
+                href="#" onclick="fetchPage({{ page_obj.paginator.num_pages }}); return false;"><i
+                    class="fas fa-angle-double-right"></i></a>
+            {% endif %}
+        </div>
+    </div>
+</div>

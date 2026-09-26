@@ -1,0 +1,128 @@
+{% extends 'admin/admin_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+    <div class="container-fluid px-4">
+        <!-- Header Section -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Sales </h1>
+            <a href="{% url 'add_sale' %}" class="btn btn-sm text-white" style="background-color: green !important;">
+                <i class="fas fa-plus"></i> New
+            </a>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+
+                <table id="datatablesSimple" class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Sale ID</th>
+                            <th class="text-center">Sale Date</th>
+                            <th>Customer</th>
+                            <th class="text-right">Total Amount</th>
+                            <!-- <th class="text-center">Approval Status</th> -->
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in sales %}
+                        <tr>
+                            <!-- Index Structure -->
+                            <!-- sale.0 = id -->
+                            <!-- sale.1 = sale_date -->
+                            <!-- sale.2 = customer_name -->
+                            <!-- sale.3 = status -->
+                            <!-- sale.4 = grand_total -->
+
+                            <td class="text-center"><strong>SALE-{{ sale.0|stringformat:"06d" }}</strong></td> 
+                            <td class="text-center">{{ sale.1|date:"d-M-Y"}}</td>
+                            <td>{{ sale.2 }}</td>
+                            <td class="text-right"><strong>₹ {{ sale.4|floatformat:2 }}</strong></td>
+                            <!-- <td class="text-center">
+                                {% if sale.3 != 'Approved' %}
+                                <a href="{% url 'approve_sale' sale.0 %}" class="btn btn-sm btn-success text-white"
+                                    onclick="return confirm('Approve this Sale and deduct stock?')">
+                                    Approve
+                                </a>
+                                {% else %}
+                                <span class="text-success fw-bold">Approved</span>
+                                {% endif %}
+                            </td> -->
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="{% url 'view_sale_items' sale.0 %}" class="btn btn-sm btn-info text-white"
+                                        title="View Items">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <!-- {% if sale.3 != 'Approved' %}
+                                    <a href="{% url 'edit_sale' sale.0 %}" class="btn btn-sm btn-warning text-white"
+                                        title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'delete_sale' sale.0 %}" class="btn btn-sm btn-danger text-white"
+                                        onclick="return confirm('Are you sure you want to delete?')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    {% else %}
+                                    <button class="btn btn-dark btn-sm text-white" disabled><i
+                                            class="fas fa-edit"></i></button>
+                                    <button class="btn btn-dark btn-sm text-white" disabled><i
+                                            class="fas fa-trash"></i></button>
+                                    {% endif %} -->
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">
+                                No sales records found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <!-- Pagination Section - Minimalist Pill -->
+                <div class="d-flex justify-content-center mt-5">
+                    <div class="pagination-pill-container">
+                        <!-- Info Section -->
+                        <div class="pagination-info-pill text-center">
+                            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of
+                            {{ page_obj.paginator.count }} entries
+                        </div>
+                        <!-- Separator -->
+                        <div class="pagination-separator"></div>
+                        <!-- Navigation Wrapper -->
+                        <div class="pagination-wrapper-pill text-center">
+                            {% if page_obj.has_previous %}
+                            <a class="page-link pagination-link-pill pagination-nav-btn" href="?page=1"><i
+                                    class="fas fa-angle-double-left"></i></a>
+                            <a class="page-link pagination-link-pill pagination-nav-btn"
+                                href="?page={{ page_obj.previous_page_number }}"><i class="fas fa-angle-left"></i></a>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <a class="page-link pagination-link-pill active" href="#">{{ num }}</a>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
+                                class="page-link pagination-link-pill" href="?page={{ num }}">{{ num }}</a>
+                                {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                <a class="page-link pagination-link-pill pagination-nav-btn"
+                                    href="?page={{ page_obj.next_page_number }}"><i class="fas fa-angle-right"></i></a>
+                                <a class="page-link pagination-link-pill pagination-nav-btn"
+                                    href="?page={{ page_obj.paginator.num_pages }}"><i
+                                        class="fas fa-angle-double-right"></i></a>
+                                {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

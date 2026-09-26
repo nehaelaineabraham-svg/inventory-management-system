@@ -1,0 +1,198 @@
+{% extends 'staffpanel/staff_layout.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">New Sales Order</h1>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form action="{% url 'staff_save_sale' %}" method="post" id="saleForm">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small">Sale Number</label>
+                                    <input type="text" class="form-control" value="{{ sale_number }}" readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small">Sale Date</label>
+                                    <input type="date" class="form-control" name="sale_date" required id="sale_date"
+                                        readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small">Customer</label>
+                                    <select class="form-control form-select" name="customer_id" required>
+                                        <option value="">-- Select Customer --</option>
+                                        <option value="0">Cash Customer</option>
+                                        {% for c in customers %}
+                                        <option value="{{c.id}}">{{c.customer_name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 mt-4">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="itemsTable">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th class="align-middle">Product</th>
+                                                    <th class="align-middle" style="width:140px;">Unit</th>
+                                                    <th class="align-middle text-center" style="width:120px;">Quantity</th>
+                                                    <th class="align-middle text-right" style="width:140px;">Rate</th>
+                                                    <th class="align-middle text-right" style="width:160px;">Total</th>
+                                                    <th class="align-middle text-center" width="100">
+                                                        <button type="button" class="btn btn-primary btn-sm rounded-pill"
+                                                            id="addRow">
+                                                            <i class="fas fa-plus me-1"></i>Row
+                                                        </button>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="item-row">
+                                                    <td>
+                                                        <select class="form-control form-select product-select" name="product_id[]"
+                                                            required>
+                                                            <option value="">-- Select Product --</option>
+                                                            {% for p in products %}
+                                                            <option value="{{p.id}}" data-price="{{p.price}}"
+                                                                data-unit="{{p.unit_id}}" data-stock="{{p.stock_qty}}"
+                                                                {% if p.stock_qty <= 0 %}disabled{% endif %}>
+                                                                {{p.product_name}} (Stock: {{p.stock_qty}})
+                                                            </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control form-select unit-select" name="unit[]" required
+                                                            disabled style="background-color: rgba(255,255,255,0.05);">
+                                                            <option value="">-- Unit --</option>
+                                                            {% for u in units %}
+                                                            <option value="{{u.unit_id}}">{{u.unit_name}}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="qty-input form-control text-center" name="qty[]"
+                                                            min="1" required placeholder="0">
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01"
+                                                            class="price-input form-control text-right" name="price[]" readonly
+                                                            style="background-color: rgba(255,255,255,0.05);">
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01"
+                                                            class="total-input form-control text-right fw-bold" name="total[]" readonly
+                                                            style="background-color: rgba(255,255,255,0.05); color: #fbbf24;">
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-danger btn-sm remove-row rounded-circle">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12 d-flex justify-content-end gap-2">
+                                    <button type="submit" class="professional-btn text-white"
+                                        style="background-color:darkgreen !important;">
+                                        <i class="fas fa-save me-1"></i> Save Sale
+                                    </button>
+                                    <a href="{% url 'staff_sales_list' %}"
+                                        class="professional-btn professional-btn-cancel"
+                                        style="background-color:red !important;">
+                                        <i class="fas fa-times me-1"></i> Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Set today's date as default
+        var today = new Date().toISOString().split('T')[0];
+        $('#sale_date').val(today);
+
+        // Add Row
+        $('#addRow').click(function () {
+            var newRow = $('.item-row:first').clone();
+            newRow.find('input').val('');
+            newRow.find('select').val('');
+            $('#itemsTable tbody').append(newRow);
+        });
+
+        // Remove Row
+        $(document).on('click', '.remove-row', function () {
+            if ($('.item-row').length > 1) {
+                $(this).closest('tr').remove();
+            } else {
+                alert("At least one item is required.");
+            }
+        });
+
+        // Update price and unit based on product selection
+        $(document).on('change', '.product-select', function () {
+            var selectedOption = $(this).find(':selected');
+            var price = selectedOption.data('price');
+            var unitId = selectedOption.data('unit');
+            var row = $(this).closest('tr');
+
+            row.find('.qty-input').val('');
+
+            if (unitId) {
+                row.find('.unit-select').val(unitId);
+            }
+            if (price) {
+                row.find('.price-input').val(price);
+            }
+
+            calculateRowTotal(row);
+        });
+
+        // Calculate total on qty or price change
+        $(document).on('input', '.qty-input', function () {
+            var row = $(this).closest('tr');
+            var qty = parseFloat(row.find('.qty-input').val()) || 0;
+            var stock = parseFloat(row.find('.product-select option:selected').data('stock')) || 0;
+
+            if (qty > stock) {
+                alert("Quantity cannot exceed available stock (" + stock + ")");
+                row.find('.qty-input').val(stock);
+            }
+
+            calculateRowTotal(row);
+        });
+
+        function calculateRowTotal(row) {
+            var qty = parseFloat(row.find('.qty-input').val()) || 0;
+            var price = parseFloat(row.find('.price-input').val()) || 0;
+            var total = (qty * price).toFixed(2);
+            row.find('.total-input').val(total);
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">View Adjustment Details</h1>
+            <a href="{% url 'manager_approve_adjustments' %}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <label class="text-muted small text-uppercase fw-bold">Adjustment ID</label>
+                                <p class="fw-bold mb-0" style="color: #fbbf24;">ADJ-{{ adj.id|stringformat:"06d" }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="text-muted small text-uppercase fw-bold">Date</label>
+                                <p class="mb-0">{{ adj.date|date:"d-M-Y H:i" }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="text-muted small text-uppercase fw-bold">Requested By</label>
+                                <p class="mb-0 fw-bold" style="color: #fbbf24;">{{ adj.staff|default:"Staff" }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="text-muted small text-uppercase fw-bold">Status</label>
+                                <p class="mb-0 fw-bold">
+                                    {% if adj.status == 'Pending' %}
+                                        <span class="text-warning">PENDING</span>
+                                    {% elif adj.status == 'Approved' %}
+                                        <span class="text-success">APPROVED</span>
+                                    {% elif adj.status == 'Rejected' %}
+                                        <span class="text-danger">REJECTED</span>
+                                    {% else %}
+                                        {{ adj.status }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label class="text-muted small text-uppercase fw-bold">Reason for Adjustment</label>
+                                <p class="mb-0 fw-bold" style="color: #fbbf24;">{{ adj.reason|default:"No reason provided." }}</p>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-center">SKU</th>
+                                        <th class="text-center">Action</th>
+                                        <th class="text-center">Adjustment Qty</th>
+                                        <th class="text-center">Unit</th>
+                                        <th class="text-center">Current Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ adj.product_name }}</td>
+                                        <td class="text-center">{{ adj.sku }}</td>
+                                        <td class="text-center fw-bold {% if adj.type == 'ADD' %}text-success{% else %}text-danger{% endif %}">
+                                            {{ adj.type }}
+                                        </td>
+                                        <td class="text-center fw-bold">{{ adj.qty }}</td>
+                                        <td class="text-center fw-bold" style="color: #fbbf24;">{{ adj.unit_name|default:"-" }}</td>
+                                        <td class="text-center">{{ adj.current_stock }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% if adj.status == 'Pending' %}
+                        <div class="mt-4 d-flex gap-2 justify-content-end">
+                            <a href="{% url 'manager_approve_adjustment_action' adj.id 2 %}"
+                                class="btn btn-success"
+                                onclick="return confirm('Approve this adjustment and update stock?')">
+                                <i class="fas fa-check"></i> Approve Adjustment
+                            </a>
+                            <a href="{% url 'manager_approve_adjustment_action' adj.id 3 %}"
+                                class="btn btn-danger"
+                                onclick="return confirm('Reject this adjustment?')">
+                                <i class="fas fa-times"></i> Reject Adjustment
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

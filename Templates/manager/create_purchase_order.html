@@ -1,0 +1,195 @@
+{% extends 'manager/manager_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+
+<style>
+    .card {
+        border-radius: 18px !important;
+        background: rgba(17, 24, 39, 0.6) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(251, 191, 36, 0.15) !important;
+    }
+    .form-control,
+    .form-select {
+        border-radius: 12px !important;
+        background: rgba(31, 41, 55, 0.7) !important;
+        border: 1.5px solid rgba(251, 191, 36, 0.15) !important;
+        color: #e5e7eb !important;
+    }
+    .form-control:focus {
+        background: rgba(31, 41, 55, 0.9) !important;
+        border-color: #fbbf24 !important;
+        box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.1) !important;
+    }
+    .table {
+        border-radius: 12px;
+        overflow: hidden;
+        color: #f3f4f6 !important;
+    }
+    .table th {
+        background: rgba(251, 191, 36, 0.1) !important;
+        color: #fbbf24 !important;
+    }
+    .professional-btn {
+        padding: 10px 25px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .professional-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+</style>
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Create Purchase Order</h1>  
+        </div>  
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4"> 
+                    <div class="card-body">
+                        <form action="{% url 'manager_save_po' %}" method="post" id="poForm">
+                            {% csrf_token %}
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small uppercase">PO Number (Auto)</label>
+                                    <input type="text" class="form-control" value="{{ po_number }}" readonly style="opacity: 0.7;">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small uppercase">PO Date</label>
+                                    <input type="date" class="form-control" name="po_date" required>
+                                </div>  
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small uppercase">Supplier</label>
+                                    <select class="form-control" name="supplier_id" required>
+                                        <option value="">-- Select Supplier --</option>
+                                        {% for s in suppliers %}
+                                            <option value="{{ s.id }}">{{ s.supplier_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="itemsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th class="align-middle">Product</th>
+                                                    <th class="align-middle text-center" style="width:100px;">Unit</th>
+                                                    <th class="align-middle text-center" style="width:120px;">Quantity</th>
+                                                    <th class="align-middle text-right" style="width:150px;">Rate (₹)</th>
+                                                    <th class="align-middle text-center" style="width:80px;"> 
+                                                        <button type="button" class="btn btn-primary btn-sm rounded-pill" id="addRow"><i class="fas fa-plus"></i></button>  
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="item-row">
+                                                    <td>
+                                                        <select name="product_id[]" class="form-control product-select" required>
+                                                            <option value="">-- Select Product --</option>
+                                                            {% for prod in products %}
+                                                            <option value="{{ prod.id }}" data-price="{{ prod.price }}" data-unit="{{ prod.unit_id }}" data-uom="{{ prod.unit_name }}"
+                                                                {% if preselected_pid == prod.id %}selected{% endif %}>
+                                                                {{ prod.product_name }} - SKU: {{ prod.sku }}
+                                                            </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </td>
+                                                    <td class="text-center align-middle">
+                                                        <input type="hidden" name="unit[]" class="unit-select">
+                                                        <span class="unit-select-name text-white">-</span>
+                                                    </td>
+                                                    <td><input type="number" name="quantity[]" class="form-control text-center" required min="1" value="1"></td>
+                                                    <td><input type="number" name="price[]" class="form-control text-right price-input" required min="0.01" step="0.01"></td>
+                                                    <td class="text-center align-middle">
+                                                        <button type="button" class="btn btn-outline-danger btn-sm remove-row border-0"><i class="fas fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-3 mt-4">
+                                <a href="{% url 'manager_approve_po' %}" class="professional-btn" style="background: rgba(107, 114, 128, 0.2); color: #d1d5db;">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                                <button type="submit" class="professional-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                                    <i class="fas fa-save"></i> Create PO
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </div>
+</main> 
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Add Row
+        $('#addRow').click(function () {
+            var table = $('#itemsTable tbody');
+            var firstRow = table.find('.item-row').first();
+            var newRow = firstRow.clone();
+
+            // Clear inputs
+            newRow.find('input').val('');
+            newRow.find('select').val('');
+            newRow.find('.unit-select-name').text('-');
+            newRow.find('input[name="quantity[]"]').val('1');
+
+            table.append(newRow);
+        });
+
+        // Remove Row
+        $(document).on('click', '.remove-row', function () {
+            var rowCount = $('#itemsTable tbody .item-row').length;
+            if (rowCount > 1) {
+                $(this).closest('tr').remove();
+            } else {
+                alert("At least one item is required.");
+            }
+        });
+
+        // Product Selection Change
+        $(document).on('change', '.product-select', function () {
+            var option = $(this).find(':selected');
+            var price = option.data('price') || 0;
+            var unitId = option.data('unit');
+            var unitName = option.data('uom') || '-';
+            var row = $(this).closest('tr');
+
+            row.find('.price-input').val(parseFloat(price).toFixed(2));
+            row.find('.unit-select').val(unitId);
+            row.find('.unit-select-name').text(unitName);
+        });
+
+        // Set today's date as default for po_date
+        var today = new Date().toISOString().split('T')[0];
+        $('input[name="po_date"]').val(today);
+
+        // Trigger change on load if a product is pre-selected
+        if ($('.product-select').val()) {
+            $('.product-select').trigger('change');
+        }
+    });
+</script>
+>
+{% endblock %}

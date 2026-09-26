@@ -1,0 +1,51 @@
+{% extends 'staffpanel/staff_layout.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'admin/assets/css/commonstyleadmin.css' %}">
+</head>
+<main>
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mt-2 mb-0" style="font-size: 1.5rem;">Goods Receipt Note</h1>
+        <a href="{% url 'staff_enter_grn' %}"
+            class="btn btn-primary btn-sm text-white">
+            <i class="fas fa-plus me-1"></i>New
+        </a>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div id="grnTableContainer" class="card-body">
+                    {% include 'staffpanel/grn_table_partial.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+
+<script>
+    const container = document.getElementById('grnTableContainer');
+
+    function fetchPage(page) {
+        const url = `{% url 'staff_grn_list' %}?page=${page}&ajax=1`;
+        
+        container.style.opacity = '0.5';
+        
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                container.innerHTML = html;
+                container.style.opacity = '1';
+                // Scroll to top of table
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            })
+            .catch(err => {
+                console.error('Fetch failed:', err);
+                container.style.opacity = '1';
+            });
+    }
+</script>
+
+{% endblock %}
